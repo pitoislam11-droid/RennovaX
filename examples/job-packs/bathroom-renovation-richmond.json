@@ -1,0 +1,378 @@
+{
+  "packId": "pack_01J8X2M4",
+  "projectId": "proj_01J8X2M3",
+  "version": 2,
+  "generatedAt": "2026-09-14T11:02:44Z",
+
+  "generatedWith": {
+    "capturePlanId": "bathroom_renovation",
+    "capturePlanVersion": 1,
+    "translationRulesetVersion": "2026.09.1"
+  },
+
+  "triage": {
+    "headline": "Full bathroom renovation",
+    "trades": ["bathroom_fitter", "plumber", "tiler", "electrician"],
+    "area": { "town": "Richmond", "outwardCode": "TW9", "travelDistanceMiles": 6.2 },
+    "sizeSummary": "Bathroom · 7.3 m² · 2nd floor flat · lift available",
+    "timing": { "posture": "WITHIN_WEEKS", "preferredStart": "Within 4 weeks", "hardDeadline": "2026-12-20", "deadlineReason": "Homeowner would like it finished before Christmas" },
+    "materialsResponsibility": "CONTRACTOR",
+    "completenessGrade": "B",
+    "completenessNotes": "All required capture completed and dimensions confirmed. Three open items remain, including an unexplained ceiling stain.",
+    "postedAt": "2026-09-14T09:15:00Z",
+    "viewerCount": 4
+  },
+
+  "property": {
+    "type": "FLAT",
+    "bedrooms": 2,
+    "floor": 2,
+    "liftAvailable": true,
+    "ageBand": "INTERWAR",
+    "tenure": "LEASEHOLDER",
+    "listedOrConservation": false,
+    "occupiedDuringWorks": true,
+    "pets": "One cat"
+  },
+
+  "spaces": [
+    {
+      "id": "space_bathroom",
+      "type": "bathroom",
+      "name": "Bathroom",
+
+      "measurements": [
+        {
+          "key": "space.bathroom.length",
+          "label": "Length",
+          "value": 2.8,
+          "unit": "m",
+          "tolerance": 0.05,
+          "provenance": {
+            "source": "MEASURED",
+            "method": "room_scan_lidar",
+            "confidence": 0.95,
+            "capturedAt": "2026-09-14T09:48:12Z",
+            "confirmedBy": "HOMEOWNER",
+            "confirmedAt": "2026-09-14T09:52:30Z",
+            "evidenceIds": ["ev_scan_01"]
+          }
+        },
+        {
+          "key": "space.bathroom.width",
+          "label": "Width",
+          "value": 2.6,
+          "unit": "m",
+          "tolerance": 0.05,
+          "provenance": {
+            "source": "MEASURED",
+            "method": "room_scan_lidar",
+            "confidence": 0.95,
+            "capturedAt": "2026-09-14T09:48:12Z",
+            "confirmedBy": "HOMEOWNER",
+            "confirmedAt": "2026-09-14T09:52:30Z",
+            "evidenceIds": ["ev_scan_01"]
+          }
+        },
+        {
+          "key": "space.bathroom.ceiling_height",
+          "label": "Ceiling height",
+          "value": 2.42,
+          "unit": "m",
+          "tolerance": 0.02,
+          "provenance": {
+            "source": "MEASURED",
+            "method": "room_scan_lidar",
+            "confidence": 0.95,
+            "capturedAt": "2026-09-14T09:48:12Z",
+            "confirmedBy": "HOMEOWNER",
+            "confirmedAt": "2026-09-14T09:52:30Z",
+            "evidenceIds": ["ev_scan_01"]
+          }
+        },
+        {
+          "key": "space.bathroom.floor_area",
+          "label": "Floor area",
+          "value": 7.3,
+          "unit": "m2",
+          "tolerance": 0.4,
+          "provenance": {
+            "source": "DERIVED",
+            "method": "rule",
+            "confidence": 0.9,
+            "derivedFrom": ["space.bathroom.length", "space.bathroom.width"],
+            "confirmedBy": "NONE",
+            "capturedAt": "2026-09-14T09:48:20Z"
+          }
+        }
+      ],
+
+      "elements": [
+        {
+          "id": "el_bath",
+          "type": "bath",
+          "label": "Bath with over-bath shower",
+          "disposition": "REMOVE",
+          "notes": "Replaced by a walk-in shower on the opposite wall.",
+          "evidenceIds": ["ev_ph_04", "ev_ph_05"],
+          "provenance": { "source": "DECLARED", "method": "homeowner_answer", "confidence": 1.0, "confirmedBy": "HOMEOWNER" }
+        },
+        {
+          "id": "el_shower_new",
+          "type": "shower",
+          "label": "New walk-in shower",
+          "disposition": "ADD_NEW",
+          "relocatingTo": "Opposite wall from the existing bath position",
+          "notes": "Homeowner would prefer level access if achievable.",
+          "provenance": { "source": "DECLARED", "method": "homeowner_answer", "confidence": 1.0, "confirmedBy": "HOMEOWNER" }
+        },
+        {
+          "id": "el_wc",
+          "type": "wc",
+          "label": "WC",
+          "disposition": "REPLACE_LIKE_FOR_LIKE",
+          "evidenceIds": ["ev_ph_06"],
+          "provenance": { "source": "DECLARED", "method": "homeowner_answer", "confidence": 1.0, "confirmedBy": "HOMEOWNER" }
+        },
+        {
+          "id": "el_basin",
+          "type": "basin",
+          "label": "Basin with pedestal",
+          "disposition": "REPLACE_LIKE_FOR_LIKE",
+          "evidenceIds": ["ev_ph_07", "ev_ph_08"],
+          "provenance": { "source": "DECLARED", "method": "homeowner_answer", "confidence": 1.0, "confirmedBy": "HOMEOWNER" }
+        },
+        {
+          "id": "el_radiator",
+          "type": "radiator",
+          "label": "Radiator",
+          "disposition": "REPLACE_DIFFERENT",
+          "notes": "Homeowner would like a heated towel rail in the same position.",
+          "evidenceIds": ["ev_ph_09"],
+          "provenance": { "source": "DECLARED", "method": "homeowner_answer", "confidence": 1.0, "confirmedBy": "HOMEOWNER" }
+        },
+        {
+          "id": "el_window",
+          "type": "window",
+          "label": "Window",
+          "disposition": "KEEP_PROTECT",
+          "evidenceIds": ["ev_ph_10"],
+          "provenance": {
+            "source": "OBSERVED",
+            "method": "room_scan_lidar",
+            "confidence": 0.93,
+            "confirmedBy": "HOMEOWNER",
+            "confirmedAt": "2026-09-14T09:53:10Z",
+            "evidenceIds": ["ev_scan_01", "ev_ph_10"]
+          }
+        },
+        {
+          "id": "el_door",
+          "type": "door",
+          "label": "Door, opens inward",
+          "disposition": "KEEP",
+          "evidenceIds": ["ev_ph_11"],
+          "provenance": {
+            "source": "OBSERVED",
+            "method": "room_scan_lidar",
+            "confidence": 0.93,
+            "confirmedBy": "HOMEOWNER",
+            "confirmedAt": "2026-09-14T09:53:10Z"
+          }
+        },
+        {
+          "id": "el_extractor",
+          "type": "extractor",
+          "label": "Extractor fan",
+          "disposition": "KEEP",
+          "evidenceIds": ["ev_ph_03"],
+          "provenance": { "source": "DECLARED", "method": "homeowner_answer", "confidence": 1.0, "confirmedBy": "HOMEOWNER" }
+        }
+      ],
+
+      "finishes": {
+        "walls": "Tiled around the bath, painted elsewhere",
+        "floor": "Tile",
+        "ceiling": "Painted"
+      },
+
+      "conditions": [
+        {
+          "type": "DAMP_OR_STAINING",
+          "description": "Staining on the ceiling above the bath. Cause not established.",
+          "severityAsPerceived": "MODERATE",
+          "remediationInScope": "UNDECIDED",
+          "evidenceIds": ["ev_ph_03", "ev_ph_12"],
+          "provenance": { "source": "OBSERVED", "method": "homeowner_answer", "confidence": 0.8, "confirmedBy": "HOMEOWNER" }
+        },
+        {
+          "type": "POOR_WORKMANSHIP",
+          "description": "Grout in poor condition around the bath.",
+          "elementId": "el_bath",
+          "severityAsPerceived": "MINOR",
+          "remediationInScope": "YES",
+          "evidenceIds": ["ev_ph_04", "ev_ph_05", "ev_ph_13"],
+          "provenance": { "source": "OBSERVED", "method": "homeowner_answer", "confidence": 0.9, "confirmedBy": "HOMEOWNER" }
+        }
+      ]
+    }
+  ],
+
+  "scope": {
+    "notifiableWorkFlags": ["PART_P_NOTIFIABLE"],
+    "workItems": [
+      {
+        "id": "wi_strip_bath",
+        "phase": "STRIP_OUT",
+        "description": "Remove existing bath, taps and shower screen",
+        "elementIds": ["el_bath"],
+        "materialsResponsibility": "CONTRACTOR",
+        "derivedFromFactKeys": ["element.bath.disposition"]
+      },
+      {
+        "id": "wi_strip_sanitary",
+        "phase": "STRIP_OUT",
+        "description": "Remove existing WC and basin",
+        "elementIds": ["el_wc", "el_basin"],
+        "materialsResponsibility": "CONTRACTOR",
+        "derivedFromFactKeys": ["element.wc.disposition", "element.basin.disposition"]
+      },
+      {
+        "id": "wi_strip_tiling",
+        "phase": "STRIP_OUT",
+        "description": "Remove existing wall and floor tiling; make good substrate",
+        "materialsResponsibility": "CONTRACTOR",
+        "derivedFromFactKeys": ["finishes.tiling_height", "space.bathroom.substrate_condition"]
+      },
+      {
+        "id": "wi_services",
+        "phase": "SERVICES",
+        "description": "Alterations to hot, cold and waste services to relocate shower to the opposite wall",
+        "elementIds": ["el_shower_new"],
+        "materialsResponsibility": "CONTRACTOR",
+        "derivedFromFactKeys": ["services.relocation_required", "element.bath.disposition"],
+        "openItemIds": ["oi_boiler_type"]
+      },
+      {
+        "id": "wi_heating",
+        "phase": "SERVICES",
+        "description": "Alteration to heating circuit for heated towel rail in existing radiator position",
+        "elementIds": ["el_radiator"],
+        "materialsResponsibility": "CONTRACTOR",
+        "derivedFromFactKeys": ["element.radiator.disposition"]
+      },
+      {
+        "id": "wi_install_shower",
+        "phase": "INSTALL",
+        "description": "Install walk-in shower enclosure and tray; level access preferred where achievable",
+        "elementIds": ["el_shower_new"],
+        "materialsResponsibility": "CONTRACTOR",
+        "derivedFromFactKeys": ["element.shower_new.disposition", "project.homeowner_notes"]
+      },
+      {
+        "id": "wi_install_sanitary",
+        "phase": "INSTALL",
+        "description": "Install new WC and basin in existing positions",
+        "elementIds": ["el_wc", "el_basin"],
+        "materialsResponsibility": "CONTRACTOR",
+        "derivedFromFactKeys": ["element.wc.disposition", "element.basin.disposition", "services.fixtures_relocating"]
+      },
+      {
+        "id": "wi_tiling",
+        "phase": "FINISHES",
+        "description": "New wall tiling — extent to be confirmed; new floor tiling throughout",
+        "materialsResponsibility": "CONTRACTOR",
+        "derivedFromFactKeys": ["finishes.tiling_height"],
+        "openItemIds": ["oi_tiling_height"]
+      },
+      {
+        "id": "wi_decorate",
+        "phase": "FINISHES",
+        "description": "Decorate remaining wall and ceiling areas",
+        "materialsResponsibility": "CONTRACTOR",
+        "derivedFromFactKeys": ["project.scope_headline"]
+      }
+    ]
+  },
+
+  "homeownerWords": {
+    "text": "The main thing is we want to get rid of the bath because my mum struggles getting in and out of it. We'd like it done before Christmas if possible.",
+    "audioEvidenceId": "ev_audio_01",
+    "transcribed": true
+  },
+
+  "openItems": [
+    {
+      "id": "oi_tiling_height",
+      "summary": "Tiling height not yet decided",
+      "whyItMatters": "Full-height versus splashback-height tiling materially changes tile quantity and labour.",
+      "origin": "HOMEOWNER_UNSURE",
+      "wouldBeResolvedBy": "A recommendation from the contractor, or a decision from the homeowner",
+      "homeownerWantsAdvice": true
+    },
+    {
+      "id": "oi_ceiling_stain",
+      "summary": "Ceiling staining above the bath — cause not established",
+      "whyItMatters": "May indicate a leak from the flat above. Could require investigation and remediation before finishing.",
+      "origin": "CONDITION_UNRESOLVED",
+      "wouldBeResolvedBy": "Investigation on site, or confirmation from the building management",
+      "homeownerWantsAdvice": true,
+      "evidenceIds": ["ev_ph_03", "ev_ph_12"]
+    },
+    {
+      "id": "oi_boiler_type",
+      "summary": "Homeowner unsure whether the flat has a combination boiler",
+      "whyItMatters": "Determines achievable shower type and whether a pump is required.",
+      "origin": "HOMEOWNER_UNSURE",
+      "wouldBeResolvedBy": "The boiler photograph provided, or a check on site",
+      "homeownerWantsAdvice": false,
+      "evidenceIds": ["ev_ph_14"]
+    }
+  ],
+
+  "access": {
+    "summary": "Second floor with lift. Permit parking zone with weekday restrictions.",
+    "floor": 2,
+    "liftAvailable": true,
+    "stepsFromEntrance": 6,
+    "parking": "PERMIT_ZONE",
+    "parkingNotes": "Restrictions 8:00–18:30, Monday to Friday",
+    "skipPossible": "PERMIT_REQUIRED",
+    "workingHoursRestrictions": "Building management restricts works to 08:00–18:00 on weekdays"
+  },
+
+  "media": {
+    "photoCount": 14,
+    "videoCount": 1,
+    "hasRoomScan": true,
+    "hasFloorLayout": true,
+    "assets": [
+      { "id": "ev_vid_01", "kind": "VIDEO", "capturedForTargetId": "walkthrough_video", "label": "Room walkthrough", "durationSeconds": 48 },
+      { "id": "ev_scan_01", "kind": "SCAN", "capturedForTargetId": "room_scan", "label": "Room scan" },
+      { "id": "ev_ph_01", "kind": "PHOTO", "capturedForTargetId": "wall_left", "label": "Left wall" },
+      { "id": "ev_ph_02", "kind": "PHOTO", "capturedForTargetId": "wall_ahead", "label": "Wall ahead" },
+      { "id": "ev_ph_03", "kind": "PHOTO", "capturedForTargetId": "ceiling", "label": "Ceiling" },
+      { "id": "ev_ph_04", "kind": "PHOTO", "capturedForTargetId": "bath_or_shower", "label": "Bath" },
+      { "id": "ev_ph_07", "kind": "PHOTO", "capturedForTargetId": "basin", "label": "Basin" },
+      { "id": "ev_ph_08", "kind": "PHOTO", "capturedForTargetId": "under_basin", "label": "Under the basin" },
+      { "id": "ev_ph_12", "kind": "PHOTO", "capturedForTargetId": "damage", "label": "Ceiling staining, close up" },
+      { "id": "ev_ph_14", "kind": "PHOTO", "capturedForTargetId": "boiler_or_cylinder", "label": "Boiler label" },
+      { "id": "ev_audio_01", "kind": "AUDIO", "capturedForTargetId": "free_text", "label": "Homeowner notes", "durationSeconds": 34 },
+      { "id": "ev_layout_01", "kind": "FLOOR_LAYOUT", "capturedForTargetId": "room_scan", "label": "Floor layout" }
+    ]
+  },
+
+  "commercial": {
+    "timing": { "posture": "WITHIN_WEEKS", "preferredStart": "Within 4 weeks", "hardDeadline": "2026-12-20" },
+    "materialsResponsibility": "CONTRACTOR",
+    "budgetPosture": "SEEKING_GUIDANCE",
+    "decisionTimeframe": "Hoping to choose within two weeks"
+  },
+
+  "provenanceSummary": {
+    "measurementSourceSummary": "LiDAR-assisted room scan, confirmed by homeowner",
+    "verificationNotice": "Dimensions are provided to help you price. Please verify on site before ordering materials.",
+    "unconfirmedFactCount": 1,
+    "skippedRequiredTargets": []
+  }
+}

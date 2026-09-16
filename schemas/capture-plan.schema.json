@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rennova.co.uk/schemas/capture-plan.schema.json",
+  "title": "Rennova Capture Plan",
+  "description": "A versioned, server-delivered description of everything that must be collected for a project category. Interpreted by the generic capture runtime in the app. Capture plans are DATA: the MVP and the fully automated future run the same schema, and only the satisfier changes.",
+  "type": "object",
+  "required": ["planId", "version", "category", "title", "steps"],
+  "additionalProperties": false,
+
+  "properties": {
+    "planId": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "Stable identifier, e.g. 'bathroom_renovation'."
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Incremented on every change. A project pins the version it started with and finishes on it."
+    },
+    "category": {
+      "type": "string",
+      "description": "Project category this plan serves."
+    },
+    "title": {
+      "type": "string",
+      "description": "Homeowner-facing name, e.g. 'Bathroom renovation'."
+    },
+    "locale": { "type": "string", "default": "en-GB" },
+    "estimatedMinutes": {
+      "type": "object",
+      "description": "Honest expectation shown to the homeowner before starting, by device tier.",
+      "properties": {
+        "tierA": { "type": "integer" },
+        "tierC": { "type": "integer" }
+      },
+      "additionalProperties": false
+    },
+    "spaces": {
+      "type": "array",
+      "description": "Space types this plan captures. MVP plans address exactly one.",
+      "items": { "type": "string" }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/step" }
+    },
+    "completeness": {
+      "$ref": "#/$defs/completenessRules"
+    }
+  },
+
+  "$defs": {
+
+    "step": {
+      "type": "object",
+      "description": "A group of targets presented as one phase of the flow, e.g. 'Let's look at your bathroom'.",
+      "required": ["id", "title", "targets"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "title": {
+          "type": "string",
+          "description": "Homeowner-facing heading. Plain English, no trade terms."
+        },
+        "subtitle": { "type": "string" },
+        "condition": {
+          "$ref": "#/$defs/condition",
+          "description": "Step is skipped entirely when this evaluates false."
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/target" }
+        }
+      }
+    },
+
+    "target": {
+      "type": "object",
+      "description": "One unit of capture: a photo, a video segment, a scan, a measurement, or a question.",
+      "required": ["id", "mode", "requirement", "instruction", "rationale"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+
+        "mode": {
+          "enum": ["PHOTO", "VIDEO_SEGMENT", "SCAN", "MEASUREMENT", "ANSWER", "CONFIRMATION"],
+          "description": "What kind of thing is being collected."
+        },
+
+        "requirement": {
+          "enum": ["REQUIRED", "RECOMMENDED", "CONDITIONAL", "OPTIONAL"],
+          "description": "REQUIRED targets must be satisfied or explicitly skipped with a reason before the pack can reach grade A."
+        },
+
+        "condition": { "$ref": "#/$defs/condition" },
+
+        "subject": {
+          "type": "string",
+          "description": "Fact-space reference to what this target concerns, e.g. 'element.bath'."
+        },
+
+        "instruction": {
+          "type": "string",
+          "description": "Homeowner-facing. Imperative, verb-first, plain English, no trade terminology. 'Show us the ceiling.'"
+        },
+        "hint": {
+          "type": "string",
+          "description": "Optional secondary line. Practical, not explanatory."
+        },
+        "illustration": {
+          "type": "string",
+          "description": "Asset key for a diagram showing what is wanted."
+        },
+        "guidance": { "$ref": "#/$defs/guidance" },
+
+        "rationale": {
+          "type": "string",
+          "description": "INTERNAL AND CONTRACTOR-FACING ONLY. Never shown to the homeowner. Why a contractor needs this. Every target must justify its cost in homeowner effort."
+        },
+
+        "satisfiedBy": {
+          "type": "array",
+          "description": "Mechanisms that can fulfil this target, best first. The evolution hook: adding DETECTION:* or ROOM_SCAN later auto-satisfies targets that a human performs today.",
+          "items": {
+            "type": "string",
+            "pattern": "^(HUMAN_CAPTURE|MANUAL_ENTRY|ANSWER|ROOM_SCAN|AR_MEASURE|LASER_BLE|DETECTION:[a-z_]+)$"
+          },
+          "default": ["HUMAN_CAPTURE"]
+        },
+
+        "acceptance": { "$ref": "#/$defs/acceptance" },
+        "question": { "$ref": "#/$defs/question" },
+        "measurement": { "$ref": "#/$defs/measurementSpec" },
+
+        "fallback": {
+          "enum": ["SKIP_WITH_REASON", "MANUAL_ENTRY", "REQUIRE", "NONE"],
+          "default": "SKIP_WITH_REASON",
+          "description": "What happens when the preferred satisfier is unavailable or fails. REQUIRE is used sparingly; a homeowner must never be trapped."
+        },
+
+        "producesOpenItemWhenSkipped": {
+          "type": "boolean",
+          "default": true,
+          "description": "A skipped target with a reason becomes a stated open item in the pack rather than a silent hole."
+        }
+      }
+    },
+
+    "guidance": {
+      "type": "object",
+      "description": "Live on-camera direction shown over the viewfinder.",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["DIRECTION", "OVERLAY", "PATH", "NONE"] },
+        "value": {
+          "enum": ["LEFT", "RIGHT", "UP", "DOWN", "FORWARD", "BACK", "TURN_SLOWLY", "MOVE_CLOSER", "STEP_BACK"]
+        },
+        "durationSeconds": { "type": "number", "description": "For VIDEO_SEGMENT targets." }
+      }
+    },
+
+    "acceptance": {
+      "type": "object",
+      "description": "What counts as satisfying this target. Checks are advisory prompts, never hard blocks.",
+      "additionalProperties": false,
+      "properties": {
+        "minPhotos": { "type": "integer", "minimum": 1 },
+        "maxPhotos": { "type": "integer" },
+        "minDurationSeconds": { "type": "number" },
+        "requireLevelHorizon": { "type": "boolean", "default": false },
+        "minLuxWarn": { "type": "number", "description": "Below this, offer the torch and warn before accepting." },
+        "blurThresholdWarn": { "type": "number" }
+      }
+    },
+
+    "question": {
+      "type": "object",
+      "description": "For ANSWER and CONFIRMATION targets. Every question must change price, scope, risk or feasibility, or it must be deleted.",
+      "required": ["factKey", "options"],
+      "additionalProperties": false,
+      "properties": {
+        "factKey": {
+          "type": "string",
+          "description": "Fact this answer writes, e.g. 'element.bath.disposition'."
+        },
+        "kind": {
+          "enum": ["SINGLE_CHOICE", "MULTI_CHOICE", "FREE_TEXT", "VOICE", "NUMBER"],
+          "default": "SINGLE_CHOICE"
+        },
+        "category": {
+          "enum": ["QUALIFYING", "SCOPE", "RISK", "PREFERENCE", "LOGISTICS"],
+          "description": "Asked in this order; commitment escalates."
+        },
+        "options": {
+          "type": "array",
+          "description": "Must be mutually exclusive and exhaustive in the homeowner's world. A NOT_SURE option is mandatory on SINGLE_CHOICE questions.",
+          "items": {
+            "type": "object",
+            "required": ["value", "label"],
+            "additionalProperties": false,
+            "properties": {
+              "value": { "type": "string" },
+              "label": {
+                "type": "string",
+                "description": "Homeowner-facing. Plain English."
+              },
+              "illustration": { "type": "string" },
+              "opensOpenItem": {
+                "type": "boolean",
+                "default": false,
+                "description": "True for NOT_SURE and similar. Creates a stated open item instead of a guess."
+              },
+              "revealsTargets": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Target ids unlocked by this answer. Escalation: an answer can add questions."
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "measurementSpec": {
+      "type": "object",
+      "description": "For MEASUREMENT targets.",
+      "required": ["factKey", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "factKey": { "type": "string" },
+        "unit": { "enum": ["mm", "m", "m2", "m3"] },
+        "acceptImperialInput": { "type": "boolean", "default": true },
+        "plausibleRange": {
+          "type": "object",
+          "description": "Used to query implausible entries gently, never to reject them.",
+          "properties": {
+            "min": { "type": "number" },
+            "max": { "type": "number" }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+
+    "condition": {
+      "type": "string",
+      "description": "Expression over the fact store, e.g. \"element.bath.present == true\". Evaluated as facts arrive, so targets appear and disappear as the picture builds."
+    },
+
+    "completenessRules": {
+      "type": "object",
+      "description": "How the pack's A-to-D grade is computed for this plan. The grade must never be inflated.",
+      "additionalProperties": false,
+      "properties": {
+        "gradeA": { "$ref": "#/$defs/gradeRule" },
+        "gradeB": { "$ref": "#/$defs/gradeRule" },
+        "gradeC": { "$ref": "#/$defs/gradeRule" }
+      }
+    },
+
+    "gradeRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requiredTargetsSatisfiedRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "maxOpenItems": { "type": "integer" },
+        "measurementsConfirmed": { "type": "boolean" },
+        "minEvidenceCount": { "type": "integer" }
+      }
+    }
+  }
+}

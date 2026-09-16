@@ -1,0 +1,549 @@
+{
+  "planId": "bathroom_renovation",
+  "version": 1,
+  "category": "bathroom_renovation",
+  "title": "Bathroom renovation",
+  "locale": "en-GB",
+  "estimatedMinutes": { "tierA": 8, "tierC": 16 },
+  "spaces": ["bathroom"],
+
+  "steps": [
+    {
+      "id": "getting_started",
+      "title": "Let's start with the basics",
+      "subtitle": "Three quick questions, then we'll take a look at the room.",
+      "targets": [
+        {
+          "id": "q_scope_headline",
+          "mode": "ANSWER",
+          "requirement": "REQUIRED",
+          "instruction": "What are you hoping to do?",
+          "rationale": "Sets the overall shape of the job and determines which later targets apply.",
+          "satisfiedBy": ["ANSWER"],
+          "question": {
+            "factKey": "project.scope_headline",
+            "category": "QUALIFYING",
+            "options": [
+              { "value": "FULL_REFIT", "label": "Replace the whole bathroom" },
+              { "value": "PARTIAL", "label": "Replace some things, keep others" },
+              { "value": "REFRESH", "label": "Freshen it up — tiles, paint, small changes" },
+              { "value": "NOT_SURE", "label": "Not sure yet", "opensOpenItem": true }
+            ]
+          }
+        },
+        {
+          "id": "q_timing",
+          "mode": "ANSWER",
+          "requirement": "REQUIRED",
+          "instruction": "When would you like the work to start?",
+          "rationale": "Timing disqualifies a job faster than almost anything else. Contractors need it in the triage header.",
+          "satisfiedBy": ["ANSWER"],
+          "question": {
+            "factKey": "project.timing.posture",
+            "category": "QUALIFYING",
+            "options": [
+              { "value": "URGENT", "label": "As soon as possible" },
+              { "value": "WITHIN_WEEKS", "label": "Within the next month or two" },
+              { "value": "FLEXIBLE", "label": "I'm flexible" },
+              { "value": "PLANNING_AHEAD", "label": "Just planning ahead for now" }
+            ]
+          }
+        },
+        {
+          "id": "q_materials",
+          "mode": "ANSWER",
+          "requirement": "REQUIRED",
+          "instruction": "Who should buy the bath, tiles and taps?",
+          "hint": "Most people ask the contractor to handle it.",
+          "rationale": "Material supply responsibility changes the quote fundamentally and is the most common cause of quotes that cannot be compared.",
+          "satisfiedBy": ["ANSWER"],
+          "question": {
+            "factKey": "project.materials_responsibility",
+            "category": "QUALIFYING",
+            "options": [
+              { "value": "CONTRACTOR", "label": "The contractor — I'd rather they sorted it" },
+              { "value": "HOMEOWNER", "label": "I'll buy them myself" },
+              { "value": "MIXED", "label": "A bit of both" },
+              { "value": "UNDECIDED", "label": "Not sure yet", "opensOpenItem": true }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "room_overview",
+      "title": "Let's take a look at your bathroom",
+      "subtitle": "Stand in the doorway to start. We'll tell you where to point.",
+      "targets": [
+        {
+          "id": "walkthrough_video",
+          "mode": "VIDEO_SEGMENT",
+          "requirement": "REQUIRED",
+          "subject": "space.bathroom",
+          "instruction": "Start at the doorway and slowly turn all the way around",
+          "hint": "Nice and slow — about ten seconds for a full turn.",
+          "illustration": "walkthrough_turn.svg",
+          "guidance": { "type": "DIRECTION", "value": "TURN_SLOWLY", "durationSeconds": 20 },
+          "rationale": "One continuous pass gives contractors context and adjacency that a set of stills never conveys. Also the primary frame source for future detection work.",
+          "satisfiedBy": ["HUMAN_CAPTURE"],
+          "acceptance": { "minDurationSeconds": 12, "minLuxWarn": 40 },
+          "fallback": "SKIP_WITH_REASON"
+        },
+        {
+          "id": "wall_left",
+          "mode": "PHOTO",
+          "requirement": "REQUIRED",
+          "subject": "space.bathroom.wall_left",
+          "instruction": "Now show us the wall on your left",
+          "illustration": "arrow_left.svg",
+          "guidance": { "type": "DIRECTION", "value": "LEFT" },
+          "rationale": "Wall-by-wall stills give tiling extent, condition and fixture positions at usable resolution.",
+          "satisfiedBy": ["HUMAN_CAPTURE"],
+          "acceptance": { "minPhotos": 1, "minLuxWarn": 40 }
+        },
+        {
+          "id": "wall_ahead",
+          "mode": "PHOTO",
+          "requirement": "REQUIRED",
+          "subject": "space.bathroom.wall_ahead",
+          "instruction": "Now the wall straight ahead of you",
+          "guidance": { "type": "DIRECTION", "value": "FORWARD" },
+          "rationale": "As above.",
+          "satisfiedBy": ["HUMAN_CAPTURE"],
+          "acceptance": { "minPhotos": 1 }
+        },
+        {
+          "id": "wall_right",
+          "mode": "PHOTO",
+          "requirement": "REQUIRED",
+          "subject": "space.bathroom.wall_right",
+          "instruction": "And the wall on your right",
+          "illustration": "arrow_right.svg",
+          "guidance": { "type": "DIRECTION", "value": "RIGHT" },
+          "rationale": "As above.",
+          "satisfiedBy": ["HUMAN_CAPTURE"],
+          "acceptance": { "minPhotos": 1 }
+        },
+        {
+          "id": "ceiling",
+          "mode": "PHOTO",
+          "requirement": "REQUIRED",
+          "subject": "space.bathroom.ceiling",
+          "instruction": "Point the camera up and show us the ceiling",
+          "guidance": { "type": "DIRECTION", "value": "UP" },
+          "rationale": "Ceiling condition, staining from leaks above, extractor and lighting positions.",
+          "satisfiedBy": ["HUMAN_CAPTURE"],
+          "acceptance": { "minPhotos": 1 }
+        },
+        {
+          "id": "floor",
+          "mode": "PHOTO",
+          "requirement": "REQUIRED",
+          "subject": "space.bathroom.floor",
+          "instruction": "Now point it down at the floor",
+          "guidance": { "type": "DIRECTION", "value": "DOWN" },
+          "rationale": "Existing floor finish, levels, and whether the substrate is timber or solid.",
+          "satisfiedBy": ["HUMAN_CAPTURE"],
+          "acceptance": { "minPhotos": 1 }
+        }
+      ]
+    },
+
+    {
+      "id": "fixtures",
+      "title": "Now the things in the room",
+      "targets": [
+        {
+          "id": "bath_or_shower",
+          "mode": "PHOTO",
+          "requirement": "REQUIRED",
+          "subject": "element.bath",
+          "instruction": "Show us the bath or shower",
+          "hint": "Stand back far enough to get the whole thing and the wall behind it.",
+          "rationale": "Removal cost, tiling behind, existing taps and screen, waste position.",
+          "satisfiedBy": ["HUMAN_CAPTURE", "DETECTION:bath", "DETECTION:shower"],
+          "acceptance": { "minPhotos": 1 }
+        },
+        {
+          "id": "wc",
+          "mode": "PHOTO",
+          "requirement": "REQUIRED",
+          "subject": "element.wc",
+          "instruction": "Show us the toilet",
+          "rationale": "Soil pipe position is the single biggest constraint on bathroom layout changes.",
+          "satisfiedBy": ["HUMAN_CAPTURE", "DETECTION:wc"],
+          "acceptance": { "minPhotos": 1 }
+        },
+        {
+          "id": "basin",
+          "mode": "PHOTO",
+          "requirement": "REQUIRED",
+          "subject": "element.basin",
+          "instruction": "Show us the sink",
+          "rationale": "Type, mounting and existing supply positions.",
+          "satisfiedBy": ["HUMAN_CAPTURE", "DETECTION:basin"],
+          "acceptance": { "minPhotos": 1 }
+        },
+        {
+          "id": "under_basin",
+          "mode": "PHOTO",
+          "requirement": "REQUIRED",
+          "subject": "element.basin.services",
+          "instruction": "Now crouch down and show us underneath the sink",
+          "hint": "We're looking at the pipes. Use the torch if it's dark.",
+          "illustration": "under_basin.svg",
+          "guidance": { "type": "DIRECTION", "value": "MOVE_CLOSER" },
+          "rationale": "Existing pipework, isolation valves and waste arrangement. Requested by contractors on a large share of bathroom jobs, so it is a required target rather than something they have to ask for.",
+          "satisfiedBy": ["HUMAN_CAPTURE"],
+          "acceptance": { "minPhotos": 1, "minLuxWarn": 30 },
+          "fallback": "SKIP_WITH_REASON"
+        },
+        {
+          "id": "radiator",
+          "mode": "PHOTO",
+          "requirement": "RECOMMENDED",
+          "subject": "element.radiator",
+          "instruction": "Is there a radiator or towel rail? Show us that too",
+          "rationale": "Heating circuit position and pipe centres.",
+          "satisfiedBy": ["HUMAN_CAPTURE", "DETECTION:radiator"],
+          "fallback": "SKIP_WITH_REASON"
+        },
+        {
+          "id": "window",
+          "mode": "PHOTO",
+          "requirement": "CONDITIONAL",
+          "condition": "space.bathroom.has_window == true",
+          "subject": "element.window",
+          "instruction": "Show us the window",
+          "rationale": "Reveal depth, sill, tiling around the opening, and ventilation.",
+          "satisfiedBy": ["HUMAN_CAPTURE", "DETECTION:window"]
+        },
+        {
+          "id": "door",
+          "mode": "PHOTO",
+          "requirement": "REQUIRED",
+          "subject": "element.door",
+          "instruction": "Show us the door, opened",
+          "rationale": "Access width for getting a bath in and rubble out, and door swing constraints on layout.",
+          "satisfiedBy": ["HUMAN_CAPTURE", "DETECTION:door"]
+        },
+        {
+          "id": "boiler_or_cylinder",
+          "mode": "PHOTO",
+          "requirement": "RECOMMENDED",
+          "instruction": "If you have a boiler or a hot water tank nearby, show us that",
+          "hint": "A photo of the label on the front is really helpful.",
+          "rationale": "Determines achievable shower type and whether a pump is needed. Homeowners cannot answer this reliably, but they can photograph it.",
+          "satisfiedBy": ["HUMAN_CAPTURE"],
+          "fallback": "SKIP_WITH_REASON"
+        },
+        {
+          "id": "damage",
+          "mode": "PHOTO",
+          "requirement": "OPTIONAL",
+          "instruction": "Is anything damaged, cracked or stained? Show us",
+          "hint": "Get close enough that we can see it clearly.",
+          "guidance": { "type": "DIRECTION", "value": "MOVE_CLOSER" },
+          "rationale": "Condition is the most common source of quote variance. Anything visible and unresolved becomes an open item.",
+          "satisfiedBy": ["HUMAN_CAPTURE", "DETECTION:damage"],
+          "acceptance": { "maxPhotos": 8 }
+        }
+      ]
+    },
+
+    {
+      "id": "measurements",
+      "title": "Let's get some measurements",
+      "subtitle": "This is the part contractors need most.",
+      "targets": [
+        {
+          "id": "room_scan",
+          "mode": "SCAN",
+          "requirement": "RECOMMENDED",
+          "subject": "space.bathroom",
+          "instruction": "Walk slowly around the room with your camera up",
+          "hint": "We'll work out the size as you go.",
+          "rationale": "Tier A devices produce confirmed dimensions and an element inventory in one pass. Falls back silently to manual entry where unavailable.",
+          "satisfiedBy": ["ROOM_SCAN", "AR_MEASURE", "MANUAL_ENTRY"],
+          "fallback": "MANUAL_ENTRY"
+        },
+        {
+          "id": "m_wall_length",
+          "mode": "MEASUREMENT",
+          "requirement": "CONDITIONAL",
+          "condition": "space.bathroom.scan_completed != true",
+          "instruction": "Measure this wall from corner to corner, along the floor",
+          "illustration": "measure_wall_corner_to_corner.svg",
+          "rationale": "Room length. A careful tape measurement is more accurate than a phone estimate, so this fallback is not a downgrade in quality.",
+          "satisfiedBy": ["MANUAL_ENTRY", "LASER_BLE"],
+          "measurement": {
+            "factKey": "space.bathroom.length",
+            "unit": "m",
+            "acceptImperialInput": true,
+            "plausibleRange": { "min": 0.8, "max": 8 }
+          }
+        },
+        {
+          "id": "m_wall_width",
+          "mode": "MEASUREMENT",
+          "requirement": "CONDITIONAL",
+          "condition": "space.bathroom.scan_completed != true",
+          "instruction": "Now measure the other wall the same way",
+          "illustration": "measure_wall_corner_to_corner.svg",
+          "rationale": "Room width.",
+          "satisfiedBy": ["MANUAL_ENTRY", "LASER_BLE"],
+          "measurement": {
+            "factKey": "space.bathroom.width",
+            "unit": "m",
+            "plausibleRange": { "min": 0.8, "max": 8 }
+          }
+        },
+        {
+          "id": "m_ceiling_height",
+          "mode": "MEASUREMENT",
+          "requirement": "CONDITIONAL",
+          "condition": "space.bathroom.scan_completed != true",
+          "instruction": "Now measure from the floor to the ceiling",
+          "illustration": "measure_floor_to_ceiling.svg",
+          "rationale": "Required for wall area and full-height tiling quantities.",
+          "satisfiedBy": ["MANUAL_ENTRY", "LASER_BLE"],
+          "measurement": {
+            "factKey": "space.bathroom.ceiling_height",
+            "unit": "m",
+            "plausibleRange": { "min": 1.9, "max": 4 }
+          }
+        },
+        {
+          "id": "confirm_dimensions",
+          "mode": "CONFIRMATION",
+          "requirement": "REQUIRED",
+          "instruction": "Does that look about right?",
+          "rationale": "Nothing produced by a sensor or a model reaches a contractor unconfirmed. 'No idea' is recorded honestly rather than forcing a false confirmation.",
+          "satisfiedBy": ["ANSWER"],
+          "question": {
+            "factKey": "space.bathroom.dimensions_confirmed",
+            "category": "SCOPE",
+            "options": [
+              { "value": "CONFIRMED", "label": "Looks right" },
+              { "value": "DISPUTED", "label": "Not quite" },
+              { "value": "UNKNOWN", "label": "No idea", "opensOpenItem": true }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "what_happens_to_things",
+      "title": "What's staying and what's going?",
+      "targets": [
+        {
+          "id": "q_bath_disposition",
+          "mode": "ANSWER",
+          "requirement": "REQUIRED",
+          "subject": "element.bath",
+          "instruction": "Are you keeping the bath?",
+          "rationale": "Core disposition. Drives strip-out, waste alterations and shower tray or enclosure work.",
+          "satisfiedBy": ["ANSWER"],
+          "question": {
+            "factKey": "element.bath.disposition",
+            "category": "SCOPE",
+            "options": [
+              { "value": "KEEP", "label": "Keeping it as it is" },
+              { "value": "REPLACE_LIKE_FOR_LIKE", "label": "New bath in the same place" },
+              { "value": "REMOVE", "label": "Taking it out and putting in a shower", "revealsTargets": ["q_shower_position"] },
+              { "value": "UNDECIDED", "label": "Not sure", "opensOpenItem": true }
+            ]
+          }
+        },
+        {
+          "id": "q_shower_position",
+          "mode": "ANSWER",
+          "requirement": "CONDITIONAL",
+          "condition": "element.bath.disposition == 'REMOVE'",
+          "instruction": "Would the shower go where the bath is now, or somewhere else?",
+          "rationale": "Relocation implies alterations to hot, cold and waste services, which is where bathroom budgets are won and lost. Always asked explicitly, never inferred.",
+          "satisfiedBy": ["ANSWER"],
+          "question": {
+            "factKey": "services.relocation_required",
+            "category": "RISK",
+            "options": [
+              { "value": "SAME_PLACE", "label": "Where the bath is now" },
+              { "value": "DIFFERENT_WALL", "label": "Somewhere else in the room" },
+              { "value": "NOT_SURE", "label": "Not sure — I'd like advice", "opensOpenItem": true }
+            ]
+          }
+        },
+        {
+          "id": "q_moving_anything",
+          "mode": "ANSWER",
+          "requirement": "REQUIRED",
+          "instruction": "Are you moving the sink or toilet to a different position?",
+          "hint": "Even a small move counts.",
+          "rationale": "Translates to first-fix plumbing alterations. Never ask the homeowner about first fix directly.",
+          "satisfiedBy": ["ANSWER"],
+          "question": {
+            "factKey": "services.fixtures_relocating",
+            "category": "RISK",
+            "options": [
+              { "value": "NO", "label": "No, everything stays where it is" },
+              { "value": "YES_SINK", "label": "Yes, the sink" },
+              { "value": "YES_TOILET", "label": "Yes, the toilet" },
+              { "value": "YES_BOTH", "label": "Yes, both" },
+              { "value": "NOT_SURE", "label": "Not sure yet", "opensOpenItem": true }
+            ]
+          }
+        },
+        {
+          "id": "q_tiling_height",
+          "mode": "ANSWER",
+          "requirement": "REQUIRED",
+          "instruction": "Would you like tiles all the way up to the ceiling?",
+          "illustration": "tiling_height_comparison.svg",
+          "rationale": "Determines tile quantity and labour. Shown as a picture because the difference is obvious visually and hard to describe.",
+          "satisfiedBy": ["ANSWER"],
+          "question": {
+            "factKey": "finishes.tiling_height",
+            "category": "PREFERENCE",
+            "options": [
+              { "value": "FULL_HEIGHT", "label": "All the way up" },
+              { "value": "SPLASHBACK", "label": "Just around the bath and sink" },
+              { "value": "NOT_SURE", "label": "Not sure — what would you suggest?", "opensOpenItem": true }
+            ]
+          }
+        },
+        {
+          "id": "q_wall_condition",
+          "mode": "ANSWER",
+          "requirement": "REQUIRED",
+          "instruction": "Are the walls cracked, damaged or uneven anywhere?",
+          "rationale": "Translates to substrate preparation. Never ask about substrate.",
+          "satisfiedBy": ["ANSWER", "DETECTION:damage"],
+          "question": {
+            "factKey": "space.bathroom.substrate_condition",
+            "category": "RISK",
+            "options": [
+              { "value": "SOUND", "label": "They seem fine" },
+              { "value": "MINOR", "label": "A few small cracks or bumps" },
+              { "value": "SIGNIFICANT", "label": "Yes, quite noticeably" },
+              { "value": "NOT_SURE", "label": "I can't tell", "opensOpenItem": true }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "access_and_extras",
+      "title": "Last few things",
+      "targets": [
+        {
+          "id": "q_floor_level",
+          "mode": "ANSWER",
+          "requirement": "REQUIRED",
+          "instruction": "Which floor is the bathroom on?",
+          "rationale": "Access is where quotes go wrong. Floor, lift and parking change the job materially.",
+          "satisfiedBy": ["ANSWER"],
+          "question": {
+            "factKey": "property.floor",
+            "category": "LOGISTICS",
+            "options": [
+              { "value": "GROUND", "label": "Ground floor" },
+              { "value": "FIRST", "label": "First floor" },
+              { "value": "SECOND_PLUS", "label": "Second floor or higher", "revealsTargets": ["q_lift"] }
+            ]
+          }
+        },
+        {
+          "id": "q_lift",
+          "mode": "ANSWER",
+          "requirement": "CONDITIONAL",
+          "condition": "property.floor == 'SECOND_PLUS'",
+          "instruction": "Is there a lift?",
+          "rationale": "Manual handling of baths, tiles and waste up several flights is a significant cost.",
+          "satisfiedBy": ["ANSWER"],
+          "question": {
+            "factKey": "property.lift_available",
+            "category": "LOGISTICS",
+            "options": [
+              { "value": "YES", "label": "Yes" },
+              { "value": "NO", "label": "No, stairs only" }
+            ]
+          }
+        },
+        {
+          "id": "q_parking",
+          "mode": "ANSWER",
+          "requirement": "RECOMMENDED",
+          "instruction": "Where would a van park?",
+          "rationale": "Permit zones and restricted hours affect both price and scheduling.",
+          "satisfiedBy": ["ANSWER"],
+          "question": {
+            "factKey": "access.parking",
+            "category": "LOGISTICS",
+            "options": [
+              { "value": "DRIVEWAY", "label": "On the driveway" },
+              { "value": "ON_STREET_FREE", "label": "On the street, free" },
+              { "value": "PERMIT_ZONE", "label": "On the street, but it's a permit area" },
+              { "value": "DIFFICULT", "label": "It's difficult around here" },
+              { "value": "UNKNOWN", "label": "Not sure", "opensOpenItem": true }
+            ]
+          }
+        },
+        {
+          "id": "q_occupied",
+          "mode": "ANSWER",
+          "requirement": "RECOMMENDED",
+          "instruction": "Will anyone be living there while the work happens?",
+          "rationale": "Occupied works mean dust protection, staged working and often a second bathroom question.",
+          "satisfiedBy": ["ANSWER"],
+          "question": {
+            "factKey": "property.occupied_during_works",
+            "category": "LOGISTICS",
+            "options": [
+              { "value": "YES", "label": "Yes" },
+              { "value": "NO", "label": "No, it'll be empty" }
+            ]
+          }
+        },
+        {
+          "id": "free_text",
+          "mode": "ANSWER",
+          "requirement": "RECOMMENDED",
+          "instruction": "Anything else you'd like contractors to know?",
+          "hint": "Tap the microphone and just talk — it's easier than typing.",
+          "rationale": "Homeowners disclose things here that no structured question would elicit, and contractors read it first. Attached to the pack verbatim, never rewritten.",
+          "satisfiedBy": ["ANSWER"],
+          "question": {
+            "factKey": "project.homeowner_notes",
+            "kind": "VOICE",
+            "category": "PREFERENCE",
+            "options": []
+          }
+        }
+      ]
+    }
+  ],
+
+  "completeness": {
+    "gradeA": {
+      "requiredTargetsSatisfiedRatio": 1.0,
+      "maxOpenItems": 2,
+      "measurementsConfirmed": true,
+      "minEvidenceCount": 10
+    },
+    "gradeB": {
+      "requiredTargetsSatisfiedRatio": 0.85,
+      "maxOpenItems": 5,
+      "measurementsConfirmed": false,
+      "minEvidenceCount": 6
+    },
+    "gradeC": {
+      "requiredTargetsSatisfiedRatio": 0.5,
+      "maxOpenItems": 99,
+      "measurementsConfirmed": false,
+      "minEvidenceCount": 1
+    }
+  }
+}

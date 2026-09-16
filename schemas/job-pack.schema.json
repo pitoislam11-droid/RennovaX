@@ -1,0 +1,375 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rennova.co.uk/schemas/job-pack.schema.json",
+  "title": "Rennova Job Pack",
+  "description": "The contractor-facing rendering of a project: the actual deliverable of the whole system. Generated from the fact store by a versioned translation ruleset, never authored directly. Every line is traceable back to an answer or a piece of evidence.",
+  "type": "object",
+  "required": ["packId", "version", "generatedAt", "triage", "property", "spaces", "scope", "media", "provenanceSummary"],
+  "additionalProperties": false,
+
+  "properties": {
+    "packId": { "type": "string" },
+    "projectId": { "type": "string" },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Incremented whenever the homeowner adds information after publication. Contractors who already quoted receive a specific diff, never a bare 'project updated'."
+    },
+    "generatedAt": { "type": "string", "format": "date-time" },
+
+    "generatedWith": {
+      "type": "object",
+      "description": "Versions that produced this pack, so a pack from months ago can still explain itself.",
+      "additionalProperties": false,
+      "properties": {
+        "capturePlanId": { "type": "string" },
+        "capturePlanVersion": { "type": "integer" },
+        "translationRulesetVersion": { "type": "string" }
+      }
+    },
+
+    "triage": { "$ref": "#/$defs/triage" },
+    "property": { "$ref": "#/$defs/property" },
+    "spaces": { "type": "array", "items": { "$ref": "#/$defs/space" } },
+    "scope": { "$ref": "#/$defs/scope" },
+    "homeownerWords": { "$ref": "#/$defs/homeownerWords" },
+    "openItems": { "type": "array", "items": { "$ref": "#/$defs/openItem" } },
+    "access": { "$ref": "#/$defs/access" },
+    "media": { "$ref": "#/$defs/media" },
+    "commercial": { "$ref": "#/$defs/commercial" },
+    "provenanceSummary": { "$ref": "#/$defs/provenanceSummary" }
+  },
+
+  "$defs": {
+
+    "triage": {
+      "type": "object",
+      "description": "Zone 1. Everything needed to decide whether to continue, readable in ten seconds.",
+      "required": ["headline", "area", "completenessGrade"],
+      "additionalProperties": false,
+      "properties": {
+        "headline": {
+          "type": "string",
+          "description": "Generated from work items, never typed by the homeowner. 'Full bathroom renovation'."
+        },
+        "trades": { "type": "array", "items": { "type": "string" } },
+        "area": {
+          "type": "object",
+          "description": "Approximate location only. The precise address is released only when the homeowner approves contact.",
+          "required": ["outwardCode"],
+          "additionalProperties": false,
+          "properties": {
+            "town": { "type": "string" },
+            "outwardCode": { "type": "string", "description": "UK postcode district, e.g. 'TW9'." },
+            "travelDistanceMiles": { "type": "number" }
+          }
+        },
+        "sizeSummary": { "type": "string", "description": "'Bathroom · 7.3 m² · 2nd floor flat · lift'" },
+        "timing": { "$ref": "#/$defs/timing" },
+        "materialsResponsibility": { "enum": ["CONTRACTOR", "HOMEOWNER", "MIXED", "UNDECIDED"] },
+        "completenessGrade": {
+          "enum": ["A", "B", "C", "D"],
+          "description": "A: priceable without a visit. B: priceable with stated assumptions. C: indicative only. D: minimal information, published at the homeowner's insistence."
+        },
+        "completenessNotes": { "type": "string" },
+        "postedAt": { "type": "string", "format": "date-time" },
+        "viewerCount": {
+          "type": "integer",
+          "description": "Viewers may be shown. Quote count must NEVER be exposed to contractors: it changes pricing behaviour and undermines sealed quoting."
+        }
+      }
+    },
+
+    "property": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "enum": ["FLAT", "TERRACED", "SEMI_DETACHED", "DETACHED", "MAISONETTE", "BUNGALOW", "OTHER"] },
+        "bedrooms": { "type": "integer" },
+        "floor": { "type": "integer" },
+        "liftAvailable": { "type": "boolean" },
+        "ageBand": { "enum": ["PRE_1919", "INTERWAR", "POST_WAR", "1980_2000", "POST_2000", "UNKNOWN"] },
+        "tenure": { "enum": ["OWNER_OCCUPIER", "LANDLORD", "LEASEHOLDER", "UNKNOWN"] },
+        "listedOrConservation": { "type": "boolean" },
+        "occupiedDuringWorks": { "type": "boolean" },
+        "pets": { "type": "string" }
+      }
+    },
+
+    "space": {
+      "type": "object",
+      "required": ["id", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "description": "e.g. 'bathroom'" },
+        "name": { "type": "string" },
+        "measurements": { "type": "array", "items": { "$ref": "#/$defs/measurement" } },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/element" } },
+        "finishes": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "walls": { "type": "string" },
+            "floor": { "type": "string" },
+            "ceiling": { "type": "string" }
+          }
+        },
+        "conditions": { "type": "array", "items": { "$ref": "#/$defs/conditionObservation" } }
+      }
+    },
+
+    "measurement": {
+      "type": "object",
+      "description": "NEVER rendered as a bare number. Source and tolerance are always displayed alongside the value.",
+      "required": ["key", "value", "unit", "provenance"],
+      "additionalProperties": false,
+      "properties": {
+        "key": { "type": "string", "description": "e.g. 'space.bathroom.floor_area'" },
+        "label": { "type": "string" },
+        "value": { "type": "number" },
+        "unit": { "enum": ["mm", "m", "m2", "m3"] },
+        "tolerance": { "type": "number", "description": "Plus or minus, in the same unit." },
+        "provenance": { "$ref": "#/$defs/provenance" }
+      }
+    },
+
+    "element": {
+      "type": "object",
+      "required": ["id", "type", "disposition"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "description": "bath, wc, basin, radiator, window, door, extractor, socket, ..." },
+        "label": { "type": "string" },
+        "disposition": { "$ref": "#/$defs/disposition" },
+        "relocatingTo": { "type": "string", "description": "Present when disposition is RELOCATE. Relocation is the single largest hidden cost driver in bathrooms and kitchens." },
+        "notes": { "type": "string" },
+        "measurements": { "type": "array", "items": { "$ref": "#/$defs/measurement" } },
+        "evidenceIds": { "type": "array", "items": { "type": "string" } },
+        "provenance": { "$ref": "#/$defs/provenance" }
+      }
+    },
+
+    "disposition": {
+      "enum": [
+        "KEEP",
+        "KEEP_PROTECT",
+        "REPLACE_LIKE_FOR_LIKE",
+        "REPLACE_DIFFERENT",
+        "RELOCATE",
+        "REMOVE",
+        "ADD_NEW",
+        "REFINISH",
+        "UNDECIDED"
+      ],
+      "description": "What is happening to this element. The heart of renovation scoping. UNDECIDED always produces an open item."
+    },
+
+    "conditionObservation": {
+      "type": "object",
+      "description": "An observed defect. A condition that has NOT been resolved into a work item must appear as an open item rather than being dropped.",
+      "required": ["type", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "enum": ["CRACK", "DAMP_OR_STAINING", "MOULD", "ROT", "UNEVEN_SURFACE", "MISSING_FINISH", "POOR_WORKMANSHIP", "CORROSION", "OTHER"] },
+        "description": { "type": "string" },
+        "elementId": { "type": "string" },
+        "severityAsPerceived": { "enum": ["MINOR", "MODERATE", "SIGNIFICANT", "UNKNOWN"] },
+        "remediationInScope": { "enum": ["YES", "NO", "UNDECIDED"] },
+        "evidenceIds": { "type": "array", "items": { "type": "string" } },
+        "provenance": { "$ref": "#/$defs/provenance" }
+      }
+    },
+
+    "scope": {
+      "type": "object",
+      "description": "Ordered by trade sequence (strip out, services, substrate, install, finishes), not by the order the homeowner mentioned things.",
+      "required": ["workItems"],
+      "additionalProperties": false,
+      "properties": {
+        "workItems": { "type": "array", "items": { "$ref": "#/$defs/workItem" } },
+        "notifiableWorkFlags": {
+          "type": "array",
+          "description": "Derived, never asked. Where scope implies gas or notifiable electrical work, say so plainly. Rennova does not give legal advice and does not certify anyone.",
+          "items": { "enum": ["GAS_SAFE_REQUIRED", "PART_P_NOTIFIABLE", "BUILDING_CONTROL_LIKELY", "STRUCTURAL_ENGINEER_LIKELY"] }
+        }
+      }
+    },
+
+    "workItem": {
+      "type": "object",
+      "description": "The unit a contractor prices. Every work item must cite the facts that produced it.",
+      "required": ["id", "phase", "description", "derivedFromFactKeys"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "phase": { "enum": ["STRIP_OUT", "SERVICES", "STRUCTURE", "SUBSTRATE", "INSTALL", "FINISHES", "MAKING_GOOD", "OTHER"] },
+        "description": { "type": "string", "description": "Trade language. Generated, not typed." },
+        "elementIds": { "type": "array", "items": { "type": "string" } },
+        "quantity": { "$ref": "#/$defs/measurement" },
+        "materialsResponsibility": { "enum": ["CONTRACTOR", "HOMEOWNER", "UNDECIDED"] },
+        "derivedFromFactKeys": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "NAVIGABLE PROVENANCE. A work item that cannot cite its sources must not be printed. This is what lets a sceptical contractor verify the pack instead of re-gathering it."
+        },
+        "openItemIds": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "homeownerWords": {
+      "type": "object",
+      "description": "The homeowner's own description, verbatim. Never rewritten, never buried. Contractors read this first and it often contains the reason behind the request, which can change the recommendation entirely.",
+      "additionalProperties": false,
+      "properties": {
+        "text": { "type": "string" },
+        "audioEvidenceId": { "type": "string" },
+        "transcribed": { "type": "boolean" }
+      }
+    },
+
+    "openItem": {
+      "type": "object",
+      "description": "A deliberately surfaced unknown. A feature, not an apology: a pack with three clearly stated unknowns is far more useful than one that looks complete and is quietly wrong.",
+      "required": ["id", "summary", "whyItMatters"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "summary": { "type": "string" },
+        "whyItMatters": { "type": "string", "description": "Stated in pricing terms." },
+        "origin": { "enum": ["HOMEOWNER_UNSURE", "TARGET_SKIPPED", "CONDITION_UNRESOLVED", "CAPTURE_FAILED", "CONTRACTOR_REQUESTED"] },
+        "wouldBeResolvedBy": { "type": "string" },
+        "homeownerWantsAdvice": { "type": "boolean" },
+        "evidenceIds": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "access": {
+      "type": "object",
+      "description": "Where quotes most often go wrong. A second-floor flat with no lift in a permit zone is a materially different job from the same room at ground level.",
+      "additionalProperties": false,
+      "properties": {
+        "summary": { "type": "string" },
+        "floor": { "type": "integer" },
+        "liftAvailable": { "type": "boolean" },
+        "stepsFromEntrance": { "type": "integer" },
+        "parking": { "enum": ["ON_STREET_FREE", "PERMIT_ZONE", "DRIVEWAY", "PAID_ONLY", "DIFFICULT", "UNKNOWN"] },
+        "parkingNotes": { "type": "string" },
+        "skipPossible": { "enum": ["YES", "PERMIT_REQUIRED", "NO", "UNKNOWN"] },
+        "workingHoursRestrictions": { "type": "string" }
+      }
+    },
+
+    "media": {
+      "type": "object",
+      "description": "Assets are served only via short-lived signed URLs scoped to the contractor granted this pack. EXIF location is stripped at ingest, without exception.",
+      "additionalProperties": false,
+      "properties": {
+        "photoCount": { "type": "integer" },
+        "videoCount": { "type": "integer" },
+        "hasRoomScan": { "type": "boolean" },
+        "hasFloorLayout": { "type": "boolean" },
+        "assets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "kind", "capturedForTargetId"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "kind": { "enum": ["PHOTO", "VIDEO", "SCAN", "AUDIO", "FLOOR_LAYOUT"] },
+              "capturedForTargetId": {
+                "type": "string",
+                "description": "Groups and labels assets by what they were meant to show. 'Under the basin' is more useful than 'IMG_0184'."
+              },
+              "label": { "type": "string" },
+              "durationSeconds": { "type": "number" },
+              "redacted": { "type": "boolean", "description": "True where faces or personal items were blurred before publication." }
+            }
+          }
+        }
+      }
+    },
+
+    "commercial": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "timing": { "$ref": "#/$defs/timing" },
+        "materialsResponsibility": { "enum": ["CONTRACTOR", "HOMEOWNER", "MIXED", "UNDECIDED"] },
+        "budgetPosture": { "enum": ["HAS_BUDGET", "SEEKING_GUIDANCE", "PRICE_SENSITIVE", "QUALITY_FIRST", "NOT_SAID"] },
+        "decisionTimeframe": { "type": "string" }
+      }
+    },
+
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "posture": { "enum": ["URGENT", "WITHIN_WEEKS", "FLEXIBLE", "PLANNING_AHEAD"] },
+        "preferredStart": { "type": "string" },
+        "hardDeadline": { "type": "string" },
+        "deadlineReason": { "type": "string" }
+      }
+    },
+
+    "provenance": {
+      "type": "object",
+      "description": "Attached to every fact in the system. The rule that makes the pack trustworthy: nothing uncertain is ever presented as certain.",
+      "required": ["source"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "enum": ["DECLARED", "OBSERVED", "ESTIMATED", "MEASURED", "DERIVED", "INFERRED"],
+          "description": "INFERRED facts are model proposals, not facts, and must NEVER reach a contractor unconfirmed. They are promoted to OBSERVED on homeowner confirmation, or discarded."
+        },
+        "method": {
+          "type": "string",
+          "description": "room_scan_lidar | ar_plane_estimate | manual_tape | laser_ble | homeowner_answer | detection_model | rule"
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "capturedAt": { "type": "string", "format": "date-time" },
+        "derivedFrom": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "A derived fact can NEVER be more confident than the least confident fact it derives from. Wall area from an estimated ceiling height is an estimate, however precise the arithmetic looks."
+        },
+        "confirmedBy": { "enum": ["HOMEOWNER", "CONTRACTOR", "NONE"] },
+        "confirmedAt": { "type": "string", "format": "date-time" },
+        "evidenceIds": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "provenanceSummary": {
+      "type": "object",
+      "description": "The block that tells a contractor how much weight to place on this pack. The clearest single signal that this is not a job board post.",
+      "required": ["measurementSourceSummary", "verificationNotice"],
+      "additionalProperties": false,
+      "properties": {
+        "measurementSourceSummary": {
+          "type": "string",
+          "description": "e.g. 'LiDAR-assisted room scan, confirmed by homeowner'."
+        },
+        "verificationNotice": {
+          "type": "string",
+          "description": "Stated once, in plain words, not drowned in disclaimers. e.g. 'Contractors should verify all dimensions before ordering materials.'"
+        },
+        "unconfirmedFactCount": { "type": "integer" },
+        "skippedRequiredTargets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["targetId", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "targetId": { "type": "string" },
+              "reason": { "enum": ["CANT_REACH", "NOT_APPLICABLE", "WILL_DO_LATER", "DECLINED", "CAPTURE_FAILED"] }
+            }
+          }
+        }
+      }
+    }
+  }
+}
