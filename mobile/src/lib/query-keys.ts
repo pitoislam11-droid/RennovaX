@@ -1,0 +1,16 @@
+export const queryKeys = {
+  profile: ['profile'] as const,
+  projects: ['projects'] as const,
+  project: (id: string) => ['projects', id] as const,
+  contractorMe: ['contractor', 'me'] as const,
+  contractorDirectory: ['contractor', 'directory'] as const,
+  contractorProfile: (id: string) => ['contractor', id] as const,
+  opportunities: ['opportunities'] as const,
+  opportunityStats: ['opportunities', 'stats'] as const,
+  opportunity: (id: string) => ['opportunities', id] as const,
+  projectQuotes: (projectId: string) => ['quotes', projectId] as const,
+  messageThreads: ['messages', 'threads'] as const,
+  messageThread: (projectId: string) => ['messages', projectId] as const,
+  callRequests: (projectId: string) => ['calls', projectId] as const,
+  notifications: ['notifications'] as const,
+};

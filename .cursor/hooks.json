@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": "cmd /c \".cursor\\skills\\impeccable\\scripts\\impeccable.cmd\" hook-before-edit",
+        "timeout": 5
+      }
+    ]
+  }
+}

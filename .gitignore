@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+**/node_modules/
+**/.expo/
+**/dist/
+**/dev.db
+**/*.db
+backend/prisma/dev.db
+mobile/.expo/

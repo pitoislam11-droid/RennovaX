@@ -1,0 +1,291 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Local Vibecode previews use SQLite. The application models deliberately avoid
+// SQLite-only features; schema.postgresql.prisma is the production datasource.
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String              @id
+  name          String
+  email         String              @unique
+  emailVerified Boolean             @default(false)
+  image         String?
+  activeRole    String              @default("HOMEOWNER")
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  roles         UserRole[]
+  projects      Project[]
+  intakes       ProjectIntake[]
+  contractor    ContractorProfile?
+  notifications Notification[]
+  assets        Asset[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                 String
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken            String?
+  refreshToken           String?
+  idToken                String?
+  accessTokenExpiresAt   DateTime?
+  refreshTokenExpiresAt  DateTime?
+  scope                   String?
+  password                String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  role      String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role])
+  @@index([userId])
+}
+
+model ContractorProfile {
+  id              String             @id @default(cuid())
+  userId          String             @unique
+  accountKind     String
+  businessName    String
+  about           String?
+  logoUrl         String?
+  serviceArea     String?
+  servicesJson    Json?
+  insuranceJson   Json?
+  verification    String             @default("UNVERIFIED")
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quotes           Quote[]
+  portfolioProjects PortfolioProject[]
+  callRequests     CallRequest[]
+}
+
+model Project {
+  id              String           @id @default(cuid())
+  homeownerId     String
+  title           String
+  category        String
+  status          String           @default("DRAFT")
+  initialRequest  String
+  locationLabel   String?
+  briefJson       Json
+  publishedAt     DateTime?
+  selectedQuoteId String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  homeowner       User             @relation(fields: [homeownerId], references: [id], onDelete: Cascade)
+  intake          ProjectIntake?
+  media           ProjectMedia[]
+  quotes          Quote[]
+  threads         MessageThread[]
+  callRequests    CallRequest[]
+
+  @@index([homeownerId, status])
+  @@index([status, publishedAt])
+}
+
+model ProjectIntake {
+  id             String         @id @default(cuid())
+  userId         String
+  projectId      String?        @unique
+  initialRequest String
+  category       String?
+  status         String         @default("IN_PROGRESS")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project        Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  answers        IntakeAnswer[]
+
+  @@index([userId, status])
+}
+
+model IntakeAnswer {
+  id           String        @id @default(cuid())
+  intakeId     String
+  questionId   String
+  questionJson Json
+  answerJson   Json
+  position     Int
+  createdAt    DateTime      @default(now())
+  intake       ProjectIntake @relation(fields: [intakeId], references: [id], onDelete: Cascade)
+
+  @@unique([intakeId, questionId])
+  @@index([intakeId, position])
+}
+
+model ProjectMedia {
+  id        String   @id @default(cuid())
+  projectId String
+  type      String   @default("PHOTO")
+  url       String
+  caption   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, sortOrder])
+}
+
+model Quote {
+  id                  String            @id @default(cuid())
+  projectId           String
+  contractorProfileId String
+  status              String            @default("DRAFT")
+  labourPence         Int               @default(0)
+  materialsPence      Int               @default(0)
+  wastePence          Int               @default(0)
+  otherPence          Int               @default(0)
+  durationText        String?
+  earliestStart       DateTime?
+  materialsIncluded   Boolean           @default(false)
+  warrantyText        String?
+  scopeText           String?
+  assumptionsText     String?
+  exclusionsText      String?
+  submittedAt         DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  project             Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  contractorProfile   ContractorProfile @relation(fields: [contractorProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, contractorProfileId])
+  @@index([projectId, status])
+  @@index([contractorProfileId, status])
+}
+
+model PortfolioProject {
+  id                  String             @id @default(cuid())
+  contractorProfileId String
+  title               String
+  area                 String?
+  description          String?
+  servicesJson         Json?
+  completedAt          DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  contractorProfile    ContractorProfile  @relation(fields: [contractorProfileId], references: [id], onDelete: Cascade)
+  media                PortfolioMedia[]
+
+  @@index([contractorProfileId, completedAt])
+}
+
+model PortfolioMedia {
+  id                 String           @id @default(cuid())
+  portfolioProjectId String
+  url                String
+  kind               String           @default("GALLERY")
+  sortOrder           Int              @default(0)
+  portfolioProject   PortfolioProject @relation(fields: [portfolioProjectId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioProjectId, sortOrder])
+}
+
+model MessageThread {
+  id        String    @id @default(cuid())
+  projectId String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  messages  Message[]
+
+  @@index([projectId])
+}
+
+model Message {
+  id        String        @id @default(cuid())
+  threadId  String
+  senderId  String
+  body      String
+  createdAt DateTime      @default(now())
+  thread    MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+  @@index([senderId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  dataJson  Json?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+}
+
+model CallRequest {
+  id                  String            @id @default(cuid())
+  projectId           String
+  contractorProfileId String
+  status              String            @default("PENDING")
+  note                String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  project             Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  contractorProfile   ContractorProfile @relation(fields: [contractorProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, contractorProfileId])
+  @@index([projectId, status])
+  @@index([contractorProfileId, status])
+}
+
+model Asset {
+  id          String   @id @default(cuid())
+  userId      String
+  fileId      String   @unique
+  url         String
+  filename    String
+  contentType String
+  sizeBytes   Int
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
