@@ -27,12 +27,12 @@ const SLIDES = [
   },
 ];
 
-const { width: WIDTH, height: HEIGHT } = Dimensions.get('window');
-const HERO_HEIGHT = Math.round(HEIGHT * 0.4);
+const HERO_HEIGHT = Math.round(Dimensions.get('window').height * 0.4);
 
 export default function Onboarding() {
   const { dispatch } = useStore();
   const [page, setPage] = useState(0);
+  const [width, setWidth] = useState(Dimensions.get('window').width);
 
   const finish = (role: Role) => {
     dispatch({ type: 'setRole', role });
@@ -41,7 +41,7 @@ export default function Onboarding() {
   };
 
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) =>
-    setPage(Math.round(e.nativeEvent.contentOffset.x / WIDTH));
+    setPage(Math.round(e.nativeEvent.contentOffset.x / width));
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.surface }}>
@@ -51,9 +51,9 @@ export default function Onboarding() {
         </Pressable>
       </View>
 
-      <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={onScroll} style={{ flex: 1 }}>
+      <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={onScroll} onLayout={(e) => setWidth(e.nativeEvent.layout.width)} style={{ flex: 1 }}>
         {SLIDES.map((s) => (
-          <View key={s.title} style={{ width: WIDTH, paddingHorizontal: GUTTER, gap: 14 }}>
+          <View key={s.title} style={{ width, paddingHorizontal: GUTTER, gap: 14 }}>
             <Text style={type.hero}>{s.title}</Text>
             <Text style={[type.body, { fontSize: 16, lineHeight: 23 }]}>{s.body}</Text>
             <Photo

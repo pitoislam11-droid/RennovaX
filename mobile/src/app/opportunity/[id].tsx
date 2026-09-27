@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { Dimensions, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -23,13 +24,12 @@ import { useStore } from '@/data/store';
 import { showAlert } from '@/lib/dialog';
 import { colors, GUTTER, space, type } from '@/theme';
 
-const WIDTH = Dimensions.get('window').width;
-
 export default function Opportunity() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { state, viewer, myBusiness, project: getProject, dispatch } = useStore();
   const insets = useSafeAreaInsets();
   const project = getProject(id);
+  const [width, setWidth] = useState(Dimensions.get('window').width);
 
   const myQuote = project ? visibleQuotes(viewer, project, state.quotes)[0] : undefined;
   if (!project || (!isOpenOpportunity(project, myBusiness) && !myQuote)) {
@@ -81,10 +81,10 @@ export default function Opportunity() {
 
   return (
     <Screen contentStyle={{ paddingTop: 0 }} footer={footer}>
-      <View>
+      <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
         <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
           {(project.photos.length ? project.photos : ['']).map((uri, i) => (
-            <Photo key={`${uri}-${i}`} uri={uri} style={{ width: WIDTH, height: 300 }} />
+            <Photo key={`${uri}-${i}`} uri={uri} style={{ width, height: 300 }} />
           ))}
         </ScrollView>
         <View style={{ position: 'absolute', top: insets.top + 8, left: GUTTER }}>
