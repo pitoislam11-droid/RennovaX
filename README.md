@@ -24,10 +24,10 @@ CONTRACTOR RECEIVES A PROFESSIONAL JOB PACK
 
 ## Repository status
 
-This repository currently contains **product and architecture understanding only**.
-No application code has been written yet. That is deliberate: the capture model, the
-provenance model and the job pack schema determine the entire shape of the app, so they
-are settled first.
+- [`mobile/`](mobile/) is the React Native + Expo app for homeowners and contractors. It runs
+  end to end on demo data; see [`mobile/README.md`](mobile/README.md) to run it.
+- [`docs/`](docs/), [`schemas/`](schemas/) and [`examples/`](examples/) hold the product and
+  architecture thinking the app is built on.
 
 ## Reading order
 
