@@ -3,7 +3,12 @@
 React Native + Expo (SDK 57) app for homeowners and contractors. It uses Expo Router for
 navigation and Apple Liquid Glass for the floating tab bar and the buttons over photos.
 
-It runs end to end on demo data, so every flow can be tried before the backend exists.
+It runs in two modes:
+
+- **Demo** (the default): sample data on the device, and fake quotes arrive after you publish.
+- **Live**: sign-in by email code and a shared Supabase database, so homeowners and contractors
+  on different phones see the same projects. Set it up with [`../supabase/README.md`](../supabase/README.md),
+  then copy `.env.example` to `.env.local` and fill it in.
 
 ## Run it
 
@@ -23,7 +28,7 @@ Android.
 ## Checks
 
 ```bash
-npm test            # marketplace rules: sealed quotes, contact control, stages, reviews
+npm test            # marketplace rules and the live data layer
 npm run typecheck
 ```
 
@@ -62,7 +67,9 @@ src/
   data/
     rules.ts      marketplace rules (pure, tested); the server must enforce the same
     questionFlows.ts  per-category questionnaires, kept as data
-    reducer.ts, store.tsx  app state, saved on the device
+    reducer.ts        app state changes
+    store.tsx         demo store (device) or live store (Supabase), same interface for screens
+    backend/          Supabase client, loading what RLS allows, sending actions
     seed.ts, demo.ts, media.ts  demo data and photos
   theme.ts
 ```
@@ -71,7 +78,6 @@ src/
 
 - **Photos:** `src/data/media.ts` points at Unsplash placeholders. Replace them with your own
   images or storage URLs.
-- **Backend:** state lives on the device (AsyncStorage). Swap `store.tsx` for API calls, and
-  enforce `rules.ts` on the server.
-- **Also needed:** auth, push notifications, real media upload with location data stripped,
-  masked phone numbers for approved calls, and contractor verification checks.
+- **Also needed:** push notifications, stripping location data from photos before upload
+  (`expo-image-manipulator`), masked phone numbers for approved calls, uploads for
+  portfolio photos and verification documents, and an admin screen for verifying contractors.

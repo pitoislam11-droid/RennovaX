@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Dimensions, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, Text, View } from 'react-native';
@@ -5,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Photo, Row } from '@/components/ui';
 import { MEDIA } from '@/data/media';
-import { useStore } from '@/data/store';
+import { INTENDED_ROLE_KEY, useStore } from '@/data/store';
 import type { Role } from '@/data/types';
 import { colors, GUTTER, type } from '@/theme';
 
@@ -30,13 +31,19 @@ const SLIDES = [
 const HERO_HEIGHT = Math.round(Dimensions.get('window').height * 0.4);
 
 export default function Onboarding() {
-  const { dispatch } = useStore();
+  const { dispatch, live } = useStore();
   const [page, setPage] = useState(0);
   const [width, setWidth] = useState(Dimensions.get('window').width);
 
   const finish = (role: Role) => {
-    dispatch({ type: 'setRole', role });
     dispatch({ type: 'onboard' });
+    if (live) {
+      // Signed-out users can't change roles yet; remember the choice for after sign-in.
+      AsyncStorage.setItem(INTENDED_ROLE_KEY, role).catch(() => undefined);
+      router.replace('/');
+      return;
+    }
+    dispatch({ type: 'setRole', role });
     router.replace('/(tabs)');
   };
 

@@ -19,8 +19,20 @@ export type Action =
   | { type: 'respondCall'; id: string; status: CallRequestStatus }
   | { type: 'sendMessage'; id: string; projectId: string; contractorId: string; from: Role; text: string; at: string };
 
-export function newId(prefix: string): string {
-  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+/**
+ * A random UUID (v4). The prefix is ignored; it documents what the id is for at the call site.
+ * Ids are made on the device so an action can be applied locally and sent to the server as-is.
+ */
+export function newId(_prefix: string): string {
+  const hex = '0123456789abcdef';
+  let out = '';
+  for (let i = 0; i < 36; i++) {
+    if (i === 8 || i === 13 || i === 18 || i === 23) out += '-';
+    else if (i === 14) out += '4';
+    else if (i === 19) out += hex[(Math.random() * 4) | 8];
+    else out += hex[(Math.random() * 16) | 0];
+  }
+  return out;
 }
 
 function updateProject(state: AppState, id: string, fn: (p: Project) => Project): AppState {

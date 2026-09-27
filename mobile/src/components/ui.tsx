@@ -8,8 +8,10 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
   type StyleProp,
+  type TextInputProps,
   type TextStyle,
   type ViewStyle,
 } from 'react-native';
@@ -373,6 +375,35 @@ export function OptionRow({
         {sublabel ? <Text style={type.meta}>{sublabel}</Text> : null}
       </View>
     </Pressable>
+  );
+}
+
+export function TextField({ label, hint, ...input }: { label: string; hint?: string } & TextInputProps) {
+  return (
+    <View style={{ gap: 8 }}>
+      <Text style={type.bodyStrong}>{label}</Text>
+      <TextInput
+        placeholderTextColor={colors.ink3}
+        accessibilityLabel={label}
+        {...input}
+        style={[
+          {
+            backgroundColor: colors.surface,
+            borderRadius: radius.md,
+            borderWidth: 1,
+            borderColor: colors.line,
+            paddingHorizontal: 16,
+            height: input.multiline ? 110 : 52,
+            paddingTop: input.multiline ? 14 : 0,
+            fontSize: 16,
+            color: colors.ink,
+            textAlignVertical: input.multiline ? 'top' : 'center',
+          },
+          input.style,
+        ]}
+      />
+      {hint ? <Text style={type.meta}>{hint}</Text> : null}
+    </View>
   );
 }
 

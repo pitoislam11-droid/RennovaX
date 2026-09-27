@@ -23,15 +23,25 @@ function LinkRow({ icon, label, onPress, last, value }: { icon: IconName; label:
 }
 
 export default function ProfileTab() {
-  const { state, me, myBusiness, dispatch } = useStore();
+  const { state, me, myBusiness, dispatch, live, account } = useStore();
   const isHomeowner = state.session.role === 'homeowner';
   const [allowCalls, setAllowCalls] = useState(true);
   const [quoteAlerts, setQuoteAlerts] = useState(true);
 
   const switchRole = () => {
+    if (live && isHomeowner && !account?.hasBusiness) {
+      router.push('/business-setup');
+      return;
+    }
     dispatch({ type: 'setRole', role: isHomeowner ? 'contractor' : 'homeowner' });
     router.replace('/(tabs)');
   };
+
+  const signOut = () =>
+    showAlert('Sign out?', undefined, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Sign out', style: 'destructive', onPress: () => account?.signOut().then(() => router.replace('/')) },
+    ]);
 
   const resetDemo = () =>
     showAlert('Reset demo data?', 'This restores the sample projects, quotes and messages.', [
@@ -43,7 +53,7 @@ export default function ProfileTab() {
     <Screen tabs>
       {isHomeowner ? (
         <Row style={{ paddingHorizontal: GUTTER, gap: 16 }}>
-          <Avatar initials={`${me.firstName[0]}${me.lastName[0]}`} color="#34455C" size={68} />
+          <Avatar initials={`${me.firstName[0] ?? ''}${me.lastName[0] ?? ''}` || '?'} color="#34455C" size={68} />
           <View style={{ flex: 1 }}>
             <Text style={type.title}>{me.firstName} {me.lastName}</Text>
             <Text style={type.meta}>Homeowner · {me.postcode}</Text>
@@ -63,8 +73,8 @@ export default function ProfileTab() {
         <>
           <Section title="Your details">
             <Card style={{ paddingVertical: 4 }}>
-              <KeyValue label="Email" value={me.email} />
-              <KeyValue label="Phone" value="Private" />
+              <KeyValue label="Email" value={me.email || account?.email || '—'} />
+              <KeyValue label="Phone" value={me.phone ? `${me.phone} · private` : 'Private'} />
               <KeyValue label="Postcode" value={me.postcode} last />
             </Card>
           </Section>
@@ -107,7 +117,7 @@ export default function ProfileTab() {
           <LinkRow
             icon={isHomeowner ? 'briefcase-outline' : 'home-outline'}
             label={isHomeowner ? 'Switch to contractor mode' : 'Switch to homeowner mode'}
-            value="Demo"
+            value={live ? undefined : 'Demo'}
             onPress={switchRole}
             last
           />
@@ -115,9 +125,15 @@ export default function ProfileTab() {
       </Section>
 
       <Section>
-        <Pressable onPress={resetDemo} accessibilityRole="button" style={{ alignItems: 'center', paddingVertical: 8 }}>
-          <Text style={[type.metaStrong, { color: colors.danger }]}>Reset demo data</Text>
-        </Pressable>
+        {live ? (
+          <Pressable onPress={signOut} accessibilityRole="button" style={{ alignItems: 'center', paddingVertical: 8 }}>
+            <Text style={[type.metaStrong, { color: colors.danger }]}>Sign out</Text>
+          </Pressable>
+        ) : (
+          <Pressable onPress={resetDemo} accessibilityRole="button" style={{ alignItems: 'center', paddingVertical: 8 }}>
+            <Text style={[type.metaStrong, { color: colors.danger }]}>Reset demo data</Text>
+          </Pressable>
+        )}
       </Section>
     </Screen>
   );

@@ -31,6 +31,7 @@ export default function GuidedProject() {
   const [description, setDescription] = useState('');
   const [area, setArea] = useState('');
   const [postcode, setPostcode] = useState(me.postcode);
+  const [address, setAddress] = useState('');
   const [photos, setPhotos] = useState<string[]>([]);
 
   const step = steps[index];
@@ -59,7 +60,7 @@ export default function GuidedProject() {
         answers,
         description: description.trim(),
         photos,
-        location: { area: area.trim(), postcode: postcode.trim().toUpperCase(), addressLine: '' },
+        location: { area: area.trim(), postcode: postcode.trim().toUpperCase(), addressLine: address.trim() },
         stage: 'published',
         createdAt: now,
         publishedAt: now,
@@ -134,6 +135,7 @@ export default function GuidedProject() {
                   <Field label="Postcode" value={postcode} onChange={setPostcode} placeholder="SW4" />
                 </View>
               </Row>
+              <Field label="Full address (private)" value={address} onChange={setAddress} placeholder="Flat 12, 48 Elm Park Road" />
               <Notice>Contractors only see your area and postcode district. Your full address is shared only with the contractor you choose.</Notice>
             </>
           ) : null}
