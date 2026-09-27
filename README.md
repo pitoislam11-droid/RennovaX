@@ -52,6 +52,10 @@ are settled first.
 Machine-readable definitions live in [`schemas/`](schemas/), with worked examples in
 [`examples/`](examples/).
 
+[`vendor/free-llm`](vendor/free-llm) is the [Free-LLM](https://github.com/nejib1/Free-LLM)
+directory of free LLM API providers, vendored as a git submodule for reference when choosing
+an AI backend. Fetch it with `git submodule update --init`.
+
 ## The three rules everything else follows from
 
 1. **Never ask the homeowner a question that assumes trade knowledge.**

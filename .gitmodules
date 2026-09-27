@@ -1,0 +1,3 @@
+[submodule "vendor/free-llm"]
+	path = vendor/free-llm
+	url = https://github.com/nejib1/Free-LLM.git
