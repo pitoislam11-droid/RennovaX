@@ -17,6 +17,7 @@ app can't bypass them, even if someone tampers with it:
 | Blocked people can't message, request calls or quote | `blocks`, message/call/quote policies |
 | Reports go to a private moderation queue | `reports` |
 | Deleting an account removes everything that was only theirs; reviews they wrote stay, unlinked | `delete_my_account` |
+| A new quote, message, call request or selection notifies only the person it is for, with no price, address or phone number | `notification_outbox` triggers |
 
 ## Set it up (about 10 minutes)
 
@@ -35,9 +36,26 @@ app can't bypass them, even if someone tampers with it:
 **Table Editor → contractors** and tick `verified_business` and `insured`, then fill in
 `insurance_cover`. Contractors can't change these columns themselves.
 
+## Push notifications
+
+A trigger writes a row to `notification_outbox` when a quote, message or call request is created,
+and when a project’s chosen contractor changes. The row names the job and the person. It does not
+include the price, the address, the phone number, or the note on a call request. Members cannot
+read this table. Phones register through `register_push_token` and are removed on sign-out.
+
+To actually deliver them:
+
+1. Deploy the function: `supabase functions deploy send-push --no-verify-jwt`
+2. In the dashboard, open **Database → Webhooks** and create a hook on `public.notification_outbox`,
+   event **Insert**, pointing at the `send-push` Edge Function. Add an auth header with the service
+   role key.
+3. If you turn on Expo’s enhanced push security, set the `EXPO_ACCESS_TOKEN` secret.
+4. Put the EAS project id on the app (a development or store build does this) so the phone can
+   obtain an Expo push token. Apply this migration to the project first.
+
 ## Test the rules
 
-The tests play a whole job through as seven accounts and check 71 rules. They need only a local
+The tests play a whole job through as seven accounts and check 108 rules. They need only a local
 Postgres 15 or later, not Supabase:
 
 ```bash

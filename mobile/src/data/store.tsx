@@ -4,11 +4,13 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useReducer,
 import { AppState as RNAppState } from 'react-native';
 
 import { showAlert } from '@/lib/dialog';
+import { presentLocal, unregisterPushToken } from '@/lib/push';
 
 import { backendEnabled, supabase } from './backend/client';
 import { deleteAccount, loadSnapshot, performRemote } from './backend/remote';
 import { buildState } from './backend/rows';
 import { DEMO_MODE, demoQuotesFor } from './demo';
+import { noticeForDevice } from './notifications';
 import { reducer, type Action } from './reducer';
 import { createSeed } from './seed';
 import type { AppState, Contractor, Homeowner, Project, Viewer } from './types';
@@ -112,9 +114,19 @@ function DemoStoreProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => {
     const wrapped = (action: Action) => {
       dispatch(action);
+      const notice = noticeForDevice(state, action);
+      if (notice) void presentLocal(notice);
       if (DEMO_MODE && action.type === 'publishProject') {
+        const published = reducer(state, action);
         demoQuotesFor(action.project, state.contractors).forEach((quote, i) => {
-          timers.current.push(setTimeout(() => dispatch({ type: 'submitQuote', quote }), 4000 + i * 5000));
+          timers.current.push(
+            setTimeout(() => {
+              const arrived = { type: 'submitQuote' as const, quote };
+              dispatch(arrived);
+              const incoming = noticeForDevice(published, arrived);
+              if (incoming) void presentLocal(incoming);
+            }, 4000 + i * 5000),
+          );
         });
       }
     };
@@ -217,6 +229,7 @@ function LiveStoreProvider({ children }: { children: ReactNode }) {
           hasBusiness: state.session.contractorId !== '',
           refresh: reload,
           signOut: async () => {
+            await unregisterPushToken(db).catch(() => undefined);
             await db.auth.signOut();
           },
           deleteAccount: () => deleteAccount(db, userId),

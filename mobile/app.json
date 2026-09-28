@@ -45,6 +45,12 @@
         {
           "photosPermission": "Add photos of your rooms so contractors can quote accurately."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#111214"
+        }
       ]
     ],
     "runtimeVersion": {

@@ -78,6 +78,10 @@ src/
 
 - **Photos:** `src/data/media.ts` points at Unsplash placeholders. Replace them with your own
   images or storage URLs.
-- **Also needed:** push notifications, stripping location data from photos before upload
+- **Push:** quotes, messages, call requests and "you were chosen" notify the right person.
+  Demo mode shows them on this phone. Live mode stores an Expo push token and sends from the
+  `send-push` Edge Function; see [`../supabase/README.md`](../supabase/README.md). A remote
+  token needs an EAS project id, which a development or store build provides.
+- **Also needed:** stripping location data from photos before upload
   (`expo-image-manipulator`), masked phone numbers for approved calls, uploads for
   portfolio photos and verification documents, and an admin screen for verifying contractors.
