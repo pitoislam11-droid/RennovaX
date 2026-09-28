@@ -24,10 +24,10 @@ CONTRACTOR RECEIVES A PROFESSIONAL JOB PACK
 
 ## Repository status
 
-This repository currently contains **product and architecture understanding only**.
-No application code has been written yet. That is deliberate: the capture model, the
-provenance model and the job pack schema determine the entire shape of the app, so they
-are settled first.
+- [`mobile/`](mobile/) is the React Native + Expo app for homeowners and contractors. It runs
+  end to end on demo data; see [`mobile/README.md`](mobile/README.md) to run it.
+- [`docs/`](docs/), [`schemas/`](schemas/) and [`examples/`](examples/) hold the product and
+  architecture thinking the app is built on.
 
 ## Reading order
 
@@ -51,6 +51,10 @@ are settled first.
 
 Machine-readable definitions live in [`schemas/`](schemas/), with worked examples in
 [`examples/`](examples/).
+
+[`vendor/free-llm`](vendor/free-llm) is the [Free-LLM](https://github.com/nejib1/Free-LLM)
+directory of free LLM API providers, vendored as a git submodule for reference when choosing
+an AI backend. Fetch it with `git submodule update --init`.
 
 ## The three rules everything else follows from
 
