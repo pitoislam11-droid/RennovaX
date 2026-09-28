@@ -10,6 +10,7 @@ import { Avatar, Button, Card, Chip, EmptyState, Header, Photo, Rating, Row, Scr
 import { costMatchRate } from '@/data/rules';
 import { useStore } from '@/data/store';
 import { showAlert } from '@/lib/dialog';
+import { askToBlock, askToReport } from '@/lib/safety';
 import { colors, GUTTER, radius, shadow, space, type } from '@/theme';
 
 type Tab = 'portfolio' | 'reviews' | 'about' | 'services';
@@ -89,7 +90,16 @@ export default function ContractorProfile() {
           <GlassIconButton icon="chevron-back" label="Back" variant="clear" onPress={() => router.back()} />
           <Row gap={10}>
             <GlassIconButton icon="share-outline" label="Share" variant="clear" onPress={() => Share.share({ message: `${c.name} on Rennova` })} />
-            <GlassIconButton icon="ellipsis-horizontal" label="More" variant="clear" onPress={() => showAlert(c.name, 'Report this profile?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Report', style: 'destructive' }])} />
+            <GlassIconButton icon="ellipsis-horizontal" label="More" variant="clear" onPress={() =>
+                showAlert(c.name, undefined, [
+                  { text: 'Report this business', onPress: () => askToReport(dispatch, 'contractor', c.id, c.name) },
+                  state.blockedIds.includes(c.ownerId)
+                    ? { text: `Unblock ${c.name}`, onPress: () => dispatch({ type: 'unblock', profileId: c.ownerId }) }
+                    : { text: `Block ${c.name}`, style: 'destructive', onPress: () => askToBlock(dispatch, c.ownerId, c.name) },
+                  { text: 'Cancel', style: 'cancel' },
+                ])
+              }
+            />
           </Row>
         </Row>
       </Photo>
@@ -173,9 +183,14 @@ export default function ContractorProfile() {
                 </Row>
                 <Stars value={r.overall} size={14} />
                 <Text style={[type.body, { color: colors.ink }]}>{r.text}</Text>
-                <Row gap={4}>
-                  <Ionicons name="shield-checkmark" size={12} color={colors.verified} />
-                  <Text style={[type.caption, { color: colors.verified, fontWeight: '600' }]}>Verified Rennova project</Text>
+                <Row style={{ justifyContent: 'space-between' }}>
+                  <Row gap={4}>
+                    <Ionicons name="shield-checkmark" size={12} color={colors.verified} />
+                    <Text style={[type.caption, { color: colors.verified, fontWeight: '600' }]}>Verified Rennova project</Text>
+                  </Row>
+                  <Text style={type.caption} onPress={() => askToReport(dispatch, 'review', r.id, 'this review')} accessibilityRole="button">
+                    Report
+                  </Text>
                 </Row>
               </Card>
             ))}

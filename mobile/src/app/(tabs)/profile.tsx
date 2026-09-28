@@ -5,6 +5,7 @@ import { Pressable, Switch, Text, View } from 'react-native';
 
 import { Avatar, Badge, Card, KeyValue, Rating, Row, Screen, Section, type IconName } from '@/components/ui';
 import { useStore } from '@/data/store';
+import { SUPPORT_EMAIL } from '@/content/legal';
 import { showAlert } from '@/lib/dialog';
 import { colors, GUTTER, space, type } from '@/theme';
 
@@ -36,6 +37,24 @@ export default function ProfileTab() {
     dispatch({ type: 'setRole', role: isHomeowner ? 'contractor' : 'homeowner' });
     router.replace('/(tabs)');
   };
+
+  const deleteAccount = () =>
+    showAlert(
+      'Delete your account?',
+      'This permanently deletes your profile, projects, photos, messages and any contractor business. Reviews you wrote stay, without your name linked to them. This can’t be undone.',
+      [
+        {
+          text: 'Delete account',
+          style: 'destructive',
+          onPress: () =>
+            account
+              ?.deleteAccount()
+              .then(() => router.replace('/'))
+              .catch((e: unknown) => showAlert('Couldn’t delete your account', e instanceof Error ? e.message : String(e))),
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ],
+    );
 
   const signOut = () =>
     showAlert('Sign out?', undefined, [
@@ -113,7 +132,13 @@ export default function ProfileTab() {
       <Section>
         <Card style={{ paddingVertical: 2 }}>
           <LinkRow icon="search-outline" label="Browse contractors" onPress={() => router.push('/find')} />
-          <LinkRow icon="help-circle-outline" label="Help & safety" onPress={() => showAlert('Help & safety', 'Support is coming soon. For now, email help@rennova.app.')} />
+          <LinkRow
+            icon="help-circle-outline"
+            label="Help & safety"
+            onPress={() => showAlert('Help & safety', `Report anything worrying from the menu on any message, profile or review. For anything else, email ${SUPPORT_EMAIL}.`)}
+          />
+          <LinkRow icon="shield-outline" label="Privacy Policy" onPress={() => router.push('/legal/privacy')} />
+          <LinkRow icon="document-text-outline" label="Terms of Use" onPress={() => router.push('/legal/terms')} />
           <LinkRow
             icon={isHomeowner ? 'briefcase-outline' : 'home-outline'}
             label={isHomeowner ? 'Switch to contractor mode' : 'Switch to homeowner mode'}
@@ -126,9 +151,14 @@ export default function ProfileTab() {
 
       <Section>
         {live ? (
-          <Pressable onPress={signOut} accessibilityRole="button" style={{ alignItems: 'center', paddingVertical: 8 }}>
-            <Text style={[type.metaStrong, { color: colors.danger }]}>Sign out</Text>
-          </Pressable>
+          <View style={{ gap: 4 }}>
+            <Pressable onPress={signOut} accessibilityRole="button" style={{ alignItems: 'center', paddingVertical: 10 }}>
+              <Text style={[type.metaStrong, { color: colors.ink }]}>Sign out</Text>
+            </Pressable>
+            <Pressable onPress={deleteAccount} accessibilityRole="button" style={{ alignItems: 'center', paddingVertical: 10 }}>
+              <Text style={[type.metaStrong, { color: colors.danger }]}>Delete account</Text>
+            </Pressable>
+          </View>
         ) : (
           <Pressable onPress={resetDemo} accessibilityRole="button" style={{ alignItems: 'center', paddingVertical: 8 }}>
             <Text style={[type.metaStrong, { color: colors.danger }]}>Reset demo data</Text>

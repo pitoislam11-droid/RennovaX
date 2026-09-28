@@ -11,6 +11,7 @@ import { newId } from '@/data/reducer';
 import { canRequestCall, canSeeHomeownerContact, contractorMayCall } from '@/data/rules';
 import { useStore } from '@/data/store';
 import { showAlert } from '@/lib/dialog';
+import { askToBlock, askToReport } from '@/lib/safety';
 import { colors, GUTTER, radius, type } from '@/theme';
 
 export default function Conversation() {
@@ -88,6 +89,21 @@ export default function Conversation() {
   };
 
   const title = me === 'homeowner' ? c.name : owner.firstName;
+  // The other person in this conversation, as a member id.
+  const otherId = me === 'homeowner' ? c.ownerId : owner.id;
+  const blocked = state.blockedIds.includes(otherId);
+
+  const more = () =>
+    showAlert(title, undefined, [
+      {
+        text: `Report ${title}`,
+        onPress: () => (me === 'homeowner' ? askToReport(dispatch, 'contractor', c.id, c.name) : askToReport(dispatch, 'profile', owner.id, owner.firstName)),
+      },
+      blocked
+        ? { text: `Unblock ${title}`, onPress: () => dispatch({ type: 'unblock', profileId: otherId }) }
+        : { text: `Block ${title}`, style: 'destructive' as const, onPress: () => askToBlock(dispatch, otherId, title) },
+      { text: 'Cancel', style: 'cancel' as const },
+    ]);
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -106,6 +122,7 @@ export default function Conversation() {
             label={me === 'contractor' && !mayCall ? 'Request call' : 'Call'}
             onPress={onCall}
           />
+          <GlassIconButton icon="ellipsis-horizontal" label="More options" onPress={more} />
         </Row>
       </View>
 
@@ -119,7 +136,11 @@ export default function Conversation() {
         {messages.map((m) => {
           const mine = m.from === me;
           return (
-            <View key={m.id} style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '80%', gap: 2 }}>
+            <Pressable
+              key={m.id}
+              onLongPress={mine ? undefined : () => askToReport(dispatch, 'message', m.id, 'this message')}
+              accessibilityHint={mine ? undefined : 'Long press to report'}
+              style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '80%', gap: 2 }}>
               <View
                 style={{
                   backgroundColor: mine ? colors.black : colors.surface,
@@ -132,10 +153,10 @@ export default function Conversation() {
                 <Text style={{ fontSize: 15, lineHeight: 21, color: mine ? '#fff' : colors.ink }}>{m.text}</Text>
               </View>
               <Text style={[type.caption, { alignSelf: mine ? 'flex-end' : 'flex-start' }]}>{relativeTime(m.at)}</Text>
-            </View>
+            </Pressable>
           );
         })}
-        {requests.map((r) => (
+        {(blocked ? [] : requests).map((r) => (
           <View key={r.id} style={{ alignSelf: 'center', backgroundColor: colors.sunk, borderRadius: radius.md, padding: 12, marginTop: 4 }}>
             <Text style={[type.meta, { textAlign: 'center' }]}>
               {r.status === 'pending' && (me === 'homeowner' ? `${c.name} asked to call you.` : 'You requested a call. Waiting for a response.')}
@@ -150,25 +171,32 @@ export default function Conversation() {
         ))}
       </ScrollView>
 
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 12, paddingTop: 8, paddingBottom: Math.max(insets.bottom, 12), backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.line }}>
-        <TextInput
-          value={text}
-          onChangeText={setText}
-          placeholder={`Message ${title}`}
-          placeholderTextColor={colors.ink3}
-          multiline
-          accessibilityLabel="Message"
-          style={{ flex: 1, minHeight: 44, maxHeight: 120, borderRadius: 22, backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, fontSize: 16, color: colors.ink }}
-        />
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Send"
-          disabled={!text.trim()}
-          onPress={send}
-          style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: text.trim() ? colors.black : colors.line, alignItems: 'center', justifyContent: 'center' }}>
-          <Ionicons name="arrow-up" size={22} color="#fff" />
-        </Pressable>
-      </View>
+      {blocked ? (
+        <View style={{ padding: GUTTER, paddingBottom: Math.max(insets.bottom, 16), gap: 10, backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.line }}>
+          <Text style={[type.meta, { textAlign: 'center' }]}>You blocked {title}. Neither of you can send messages here.</Text>
+          <Button label={`Unblock ${title}`} variant="secondary" small onPress={() => dispatch({ type: 'unblock', profileId: otherId })} />
+        </View>
+      ) : (
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 12, paddingTop: 8, paddingBottom: Math.max(insets.bottom, 12), backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.line }}>
+          <TextInput
+            value={text}
+            onChangeText={setText}
+            placeholder={`Message ${title}`}
+            placeholderTextColor={colors.ink3}
+            multiline
+            accessibilityLabel="Message"
+            style={{ flex: 1, minHeight: 44, maxHeight: 120, borderRadius: 22, backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, fontSize: 16, color: colors.ink }}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Send"
+            disabled={!text.trim()}
+            onPress={send}
+            style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: text.trim() ? colors.black : colors.line, alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="arrow-up" size={22} color="#fff" />
+          </Pressable>
+        </View>
+      )}
     </KeyboardAvoidingView>
   );
 }

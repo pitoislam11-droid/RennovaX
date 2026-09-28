@@ -14,12 +14,20 @@ export default function MessagesTab() {
   const threads = state.threads
     .filter((t) => {
       const p = project(t.projectId);
-      return isHomeowner ? p?.ownerId === me.id : t.contractorId === myBusiness.id;
+      if (!p) return false;
+      const other = isHomeowner ? contractor(t.contractorId)?.ownerId : p.ownerId;
+      if (other && state.blockedIds.includes(other)) return false;
+      return isHomeowner ? p.ownerId === me.id : t.contractorId === myBusiness.id;
     })
     .sort((a, b) => (b.messages.at(-1)?.at ?? '').localeCompare(a.messages.at(-1)?.at ?? ''));
 
   const pendingCalls = isHomeowner
-    ? state.callRequests.filter((r) => r.status === 'pending' && project(r.projectId)?.ownerId === me.id)
+    ? state.callRequests.filter(
+        (r) =>
+          r.status === 'pending' &&
+          project(r.projectId)?.ownerId === me.id &&
+          !state.blockedIds.includes(contractor(r.contractorId)?.ownerId ?? ''),
+      )
     : [];
 
   return (

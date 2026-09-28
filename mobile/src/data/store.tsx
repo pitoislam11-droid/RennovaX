@@ -6,7 +6,7 @@ import { AppState as RNAppState } from 'react-native';
 import { showAlert } from '@/lib/dialog';
 
 import { backendEnabled, supabase } from './backend/client';
-import { loadSnapshot, performRemote } from './backend/remote';
+import { deleteAccount, loadSnapshot, performRemote } from './backend/remote';
 import { buildState } from './backend/rows';
 import { DEMO_MODE, demoQuotesFor } from './demo';
 import { reducer, type Action } from './reducer';
@@ -26,6 +26,7 @@ export interface Account {
   hasBusiness: boolean;
   refresh: () => Promise<void>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 interface StoreValue {
@@ -52,11 +53,12 @@ const EMPTY_STATE: AppState = {
   callRequests: [],
   threads: [],
   reviews: [],
+  blockedIds: [],
 };
 
 const NOBODY: Homeowner = { id: '', firstName: '', lastName: '', email: '', phone: '', postcode: '' };
 const NO_BUSINESS: Contractor = {
-  id: '', name: '', initials: '', logoColor: '#5B6270', businessType: 'company', categories: [], rating: 0, reviewCount: 0,
+  id: '', ownerId: '', name: '', initials: '', logoColor: '#5B6270', businessType: 'company', categories: [], rating: 0, reviewCount: 0,
   yearsExperience: 0, projectsCompleted: 0, verifiedBusiness: false, insured: false, insuranceCover: '', about: '', services: [],
   areas: [], baseArea: '', replyTime: '', phone: '', cover: '', portfolio: [],
 };
@@ -217,6 +219,7 @@ function LiveStoreProvider({ children }: { children: ReactNode }) {
           signOut: async () => {
             await db.auth.signOut();
           },
+          deleteAccount: () => deleteAccount(db, userId),
         }
       : null;
     return makeValue(withFlags, dispatch, true, account);

@@ -11,6 +11,7 @@ const iso = (offsetDays: number, now: number) => new Date(now + offsetDays * DAY
 const contractors: Contractor[] = [
   {
     id: 'c-brighthome',
+    ownerId: 'u-brighthome',
     name: 'BrightHome Decor',
     initials: 'BH',
     logoColor: '#123F35',
@@ -70,6 +71,7 @@ const contractors: Contractor[] = [
   },
   {
     id: 'c-londoncoats',
+    ownerId: 'u-londoncoats',
     name: 'London Coats',
     initials: 'LC',
     logoColor: '#1F1F24',
@@ -96,6 +98,7 @@ const contractors: Contractor[] = [
   },
   {
     id: 'c-prime',
+    ownerId: 'u-prime',
     name: 'Prime Decorators',
     initials: 'P',
     logoColor: '#2B2F36',
@@ -121,6 +124,7 @@ const contractors: Contractor[] = [
   },
   {
     id: 'c-nova',
+    ownerId: 'u-nova',
     name: 'Nova Bathrooms',
     initials: 'NB',
     logoColor: '#1C3F7A',
@@ -146,6 +150,7 @@ const contractors: Contractor[] = [
   },
   {
     id: 'c-hartley',
+    ownerId: 'u-hartley',
     name: 'Hartley Kitchens',
     initials: 'HK',
     logoColor: '#6A4325',
@@ -372,5 +377,6 @@ export function createSeed(now = Date.now()): AppState {
     ],
     threads,
     reviews,
+    blockedIds: [],
   };
 }

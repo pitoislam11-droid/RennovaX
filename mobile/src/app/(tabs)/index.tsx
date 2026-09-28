@@ -110,7 +110,7 @@ function ContractorHome() {
   const [filter, setFilter] = useState<'all' | 'invited' | 'new'>('all');
 
   const opportunities = useMemo(() => {
-    const open = state.projects.filter((p) => isOpenOpportunity(p, myBusiness));
+    const open = state.projects.filter((p) => isOpenOpportunity(p, myBusiness) && !state.blockedIds.includes(p.ownerId));
     if (filter === 'invited') return open.filter((p) => p.invitedContractorIds.includes(myBusiness.id));
     if (filter === 'new') return open.filter((p) => canSubmitQuote(myBusiness.id, p, state.quotes));
     return open;

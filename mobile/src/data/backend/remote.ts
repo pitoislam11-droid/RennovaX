@@ -29,7 +29,7 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
 }
 
 export async function loadSnapshot(db: SupabaseClient, userId: string): Promise<Snapshot> {
-  const [myPrivate, contractors, stats, portfolio, projects, addresses, invites, quotes, calls, messages, reviews] = await Promise.all([
+  const [myPrivate, contractors, stats, portfolio, projects, addresses, invites, quotes, calls, messages, reviews, blocks] = await Promise.all([
     db.from('profile_private').select('id, email, phone').eq('id', userId).maybeSingle().then(check<PrivateRow | null>),
     db.from('contractors').select('*').order('created_at', { ascending: false }).limit(300).then(check<ContractorRow[]>),
     db.from('contractor_stats').select('contractor_id, rating, review_count, projects_completed').then(check<StatsRow[]>),
@@ -41,6 +41,7 @@ export async function loadSnapshot(db: SupabaseClient, userId: string): Promise<
     db.from('call_requests').select('*').then(check<CallRow[]>),
     db.from('messages').select('id, project_id, contractor_id, sender_role, body, created_at').order('created_at').limit(2000).then(check<MessageRow[]>),
     db.from('reviews').select('*').order('created_at', { ascending: false }).limit(300).then(check<ReviewRow[]>),
+    db.from('blocks').select('blocked_id').then(check<{ blocked_id: string }[]>),
   ]);
 
   const peopleIds = [...new Set([userId, ...projects.map((p) => p.owner_id)])];
@@ -71,7 +72,11 @@ export async function loadSnapshot(db: SupabaseClient, userId: string): Promise<
     for (const item of data ?? []) if (item.path && item.signedUrl) photoUrls[item.path] = item.signedUrl;
   }
 
-  return { userId, profiles, myPrivate, releasedPhones, contractors, stats, portfolio, projects, addresses, invites, quotes, calls, messages, reviews, photoUrls };
+  return {
+    userId, profiles, myPrivate, releasedPhones, contractors, stats, portfolio, projects, addresses, invites, quotes, calls, messages, reviews,
+    blocks: blocks.map((b) => b.blocked_id),
+    photoUrls,
+  };
 }
 
 /** Uploads local photo files and returns their storage paths. */
@@ -189,6 +194,15 @@ export async function performRemote(db: SupabaseClient, userId: string, action: 
     case 'setRole':
       check(await db.from('profiles').update({ role: action.role }).eq('id', userId));
       return;
+    case 'report':
+      check(await db.from('reports').insert({ target_type: action.targetType, target_id: action.targetId, reason: action.reason }));
+      return;
+    case 'block':
+      check(await db.from('blocks').upsert({ blocked_id: action.profileId }, { ignoreDuplicates: true }));
+      return;
+    case 'unblock':
+      check(await db.from('blocks').delete().eq('blocked_id', action.profileId));
+      return;
     case 'hydrate':
     case 'reset':
     case 'onboard':
@@ -241,4 +255,17 @@ export async function createBusiness(db: SupabaseClient, userId: string, b: Busi
     }),
   );
   check(await db.from('profiles').update({ role: 'contractor' }).eq('id', userId));
+}
+
+/**
+ * Deletes the signed-in user's photos, then their account. The database removes everything that
+ * belonged only to them (see delete_my_account in the migrations).
+ */
+export async function deleteAccount(db: SupabaseClient, userId: string): Promise<void> {
+  const { data: files } = await db.storage.from(PROJECT_PHOTOS_BUCKET).list(userId, { limit: 1000 });
+  if (files && files.length > 0) {
+    await db.storage.from(PROJECT_PHOTOS_BUCKET).remove(files.map((f) => `${userId}/${f.name}`));
+  }
+  check(await db.rpc('delete_my_account'));
+  await db.auth.signOut();
 }

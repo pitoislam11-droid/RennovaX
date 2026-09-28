@@ -47,6 +47,8 @@ export interface PortfolioItem {
 
 export interface Contractor {
   id: string;
+  /** The member account that runs this business. */
+  ownerId: string;
   name: string;
   initials: string;
   logoColor: string;
@@ -140,6 +142,8 @@ export interface Thread {
   messages: Message[];
 }
 
+export type ReportTarget = 'message' | 'review' | 'contractor' | 'project' | 'profile';
+
 export type CostMatch = 'exact' | 'more_agreed' | 'more_unagreed' | 'less';
 
 export interface Review {
@@ -175,6 +179,8 @@ export interface AppState {
   callRequests: CallRequest[];
   threads: Thread[];
   reviews: Review[];
+  /** Member (profile) ids this user has blocked. */
+  blockedIds: string[];
 }
 
 /** Who is looking at something. Every visibility rule takes one of these. */

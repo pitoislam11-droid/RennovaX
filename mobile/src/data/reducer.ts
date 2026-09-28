@@ -1,6 +1,6 @@
 import { applySelection, canTransition } from './rules';
 import { createSeed } from './seed';
-import type { AppState, CallRequestStatus, Project, ProjectStage, Quote, Review, Role } from './types';
+import type { AppState, CallRequestStatus, Project, ProjectStage, Quote, ReportTarget, Review, Role } from './types';
 
 export type Action =
   | { type: 'hydrate'; state: AppState }
@@ -17,7 +17,10 @@ export type Action =
   | { type: 'addReview'; review: Review }
   | { type: 'requestCall'; id: string; projectId: string; contractorId: string; note: string; at: string }
   | { type: 'respondCall'; id: string; status: CallRequestStatus }
-  | { type: 'sendMessage'; id: string; projectId: string; contractorId: string; from: Role; text: string; at: string };
+  | { type: 'sendMessage'; id: string; projectId: string; contractorId: string; from: Role; text: string; at: string }
+  | { type: 'report'; targetType: ReportTarget; targetId: string; reason: string }
+  | { type: 'block'; profileId: string }
+  | { type: 'unblock'; profileId: string };
 
 /**
  * A random UUID (v4). The prefix is ignored; it documents what the id is for at the call site.
@@ -42,7 +45,8 @@ function updateProject(state: AppState, id: string, fn: (p: Project) => Project)
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'hydrate':
-      return action.state;
+      // Older saved demo data may predate newer fields.
+      return { ...action.state, blockedIds: action.state.blockedIds ?? [] };
     case 'reset':
       return { ...createSeed(), session: { ...createSeed().session, onboarded: true } };
     case 'onboard':
@@ -120,6 +124,13 @@ export function reducer(state: AppState, action: Action): AppState {
           r.id === action.id && r.status === 'pending' ? { ...r, status: action.status } : r,
         ),
       };
+    case 'report':
+      // Reports go to Rennova's moderation queue; nothing changes on the reporter's screen.
+      return state;
+    case 'block':
+      return state.blockedIds.includes(action.profileId) ? state : { ...state, blockedIds: [...state.blockedIds, action.profileId] };
+    case 'unblock':
+      return { ...state, blockedIds: state.blockedIds.filter((id) => id !== action.profileId) };
     case 'sendMessage': {
       const text = action.text.trim();
       if (!text) return state;

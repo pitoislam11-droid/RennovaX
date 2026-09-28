@@ -45,7 +45,7 @@ export interface QuoteRow {
 export interface CallRow { id: string; project_id: string; contractor_id: string; note: string; status: CallRequestStatus; created_at: string }
 export interface MessageRow { id: string; project_id: string; contractor_id: string; sender_role: Role; body: string; created_at: string }
 export interface ReviewRow {
-  id: string; project_id: string; contractor_id: string; author_display: string; overall: number; quality: number;
+  id: string; project_id: string | null; contractor_id: string; author_display: string; overall: number; quality: number;
   communication: number; timekeeping: number; cleanliness: number; value: number; cost_match: CostMatch; body: string; created_at: string;
 }
 
@@ -65,6 +65,8 @@ export interface Snapshot {
   calls: CallRow[];
   messages: MessageRow[];
   reviews: ReviewRow[];
+  /** Member ids I have blocked. */
+  blocks: string[];
   /** Storage path → signed URL, for project photos. */
   photoUrls: Record<string, string>;
 }
@@ -94,6 +96,7 @@ export function buildState(s: Snapshot): AppState {
     const st = s.stats.find((x) => x.contractor_id === c.id);
     return {
       id: c.id,
+      ownerId: c.owner_id,
       name: c.name,
       initials: initials(c.name),
       logoColor: c.logo_color,
@@ -197,7 +200,7 @@ export function buildState(s: Snapshot): AppState {
     threads: [...threads.values()],
     reviews: s.reviews.map((r) => ({
       id: r.id,
-      projectId: r.project_id,
+      projectId: r.project_id ?? '',
       contractorId: r.contractor_id,
       authorName: r.author_display || 'Verified homeowner',
       overall: r.overall,
@@ -210,5 +213,6 @@ export function buildState(s: Snapshot): AppState {
       text: r.body,
       createdAt: r.created_at,
     })),
+    blockedIds: s.blocks,
   };
 }

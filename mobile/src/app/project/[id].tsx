@@ -32,7 +32,9 @@ export default function ProjectScreen() {
     );
   }
 
-  const quotes = comparisonOrder(visibleQuotes(viewer, project, state.quotes));
+  const quotes = comparisonOrder(visibleQuotes(viewer, project, state.quotes)).filter(
+    (q) => !state.blockedIds.includes(contractor(q.contractorId)?.ownerId ?? ''),
+  );
   const threads = state.threads.filter((t) => t.projectId === project.id);
   const selected = project.selectedContractorId ? contractor(project.selectedContractorId) : undefined;
   const cat = getCategory(project.categoryId);

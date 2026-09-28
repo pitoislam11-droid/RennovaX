@@ -14,6 +14,9 @@ app can't bypass them, even if someone tampers with it:
 | Contractors can't mark themselves verified or insured | `contractors` column grants |
 | One review per completed project, by its homeowner, about the chosen contractor | `reviews` policies |
 | Contractors see photos only for projects they can see | `storage.objects` policies |
+| Blocked people can't message, request calls or quote | `blocks`, message/call/quote policies |
+| Reports go to a private moderation queue | `reports` |
+| Deleting an account removes everything that was only theirs; reviews they wrote stay, unlinked | `delete_my_account` |
 
 ## Set it up (about 10 minutes)
 
@@ -34,7 +37,7 @@ app can't bypass them, even if someone tampers with it:
 
 ## Test the rules
 
-The tests play a whole job through as five accounts and check 55 rules. They need only a local
+The tests play a whole job through as seven accounts and check 71 rules. They need only a local
 Postgres 15 or later, not Supabase:
 
 ```bash

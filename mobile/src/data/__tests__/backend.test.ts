@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { performRemote } from '../backend/remote';
 import { buildState, type Snapshot } from '../backend/rows';
+import { reducer } from '../reducer';
 import { visibleQuotes } from '../rules';
 
 jest.mock('../backend/client', () => ({ PROJECT_PHOTOS_BUCKET: 'project-photos', backendEnabled: false, supabase: null }));
@@ -52,6 +53,7 @@ function snapshot(over: Partial<Snapshot> = {}): Snapshot {
       { id: 'm1', project_id: P, contractor_id: BH, sender_role: 'contractor', body: 'Painted over?', created_at: '2026-09-21T11:00:00Z' },
     ],
     reviews: [],
+    blocks: [],
     photoUrls: { [`${ME}/a.jpg`]: 'https://signed.example/a.jpg' },
     ...over,
   };
@@ -130,5 +132,26 @@ describe('performRemote', () => {
     const { db, calls } = recorder();
     await performRemote(db, ME, { type: 'sendMessage', id: 'm9', projectId: P, contractorId: BH, from: 'homeowner', text: '  Hello  ', at: '' });
     expect(calls[0]).toMatchObject({ table: 'messages', op: 'insert', payload: { sender_role: 'homeowner', body: 'Hello' } });
+  });
+});
+
+describe('safety actions', () => {
+  it('sends reports and blocks to their tables', async () => {
+    const { db, calls } = recorder();
+    await performRemote(db, ME, { type: 'report', targetType: 'message', targetId: 'm1', reason: 'Spam or scam' });
+    await performRemote(db, ME, { type: 'block', profileId: DAN });
+    expect(calls[0]).toMatchObject({ table: 'reports', op: 'insert', payload: { target_type: 'message', target_id: 'm1', reason: 'Spam or scam' } });
+    expect(calls[1]).toMatchObject({ table: 'blocks', op: 'upsert', payload: { blocked_id: DAN } });
+    // The reporter and blocker are always the signed-in user, set by the database.
+    expect(calls[0].payload).not.toHaveProperty('reporter_id');
+    expect(calls[1].payload).not.toHaveProperty('blocker_id');
+  });
+
+  it('keeps a block list that can be undone', () => {
+    const s = buildState(snapshot({ blocks: [DAN] }));
+    expect(s.blockedIds).toEqual([DAN]);
+    const unblocked = reducer(s, { type: 'unblock', profileId: DAN });
+    expect(unblocked.blockedIds).toEqual([]);
+    expect(reducer(unblocked, { type: 'block', profileId: DAN }).blockedIds).toEqual([DAN]);
   });
 });

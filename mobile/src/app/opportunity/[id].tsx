@@ -22,6 +22,7 @@ import {
 } from '@/data/rules';
 import { useStore } from '@/data/store';
 import { showAlert } from '@/lib/dialog';
+import { askToBlock, askToReport } from '@/lib/safety';
 import { colors, GUTTER, space, type } from '@/theme';
 
 export default function Opportunity() {
@@ -87,9 +88,21 @@ export default function Opportunity() {
             <Photo key={`${uri}-${i}`} uri={uri} style={{ width, height: 300 }} />
           ))}
         </ScrollView>
-        <View style={{ position: 'absolute', top: insets.top + 8, left: GUTTER }}>
+        <Row style={{ position: 'absolute', top: insets.top + 8, left: GUTTER, right: GUTTER, justifyContent: 'space-between' }}>
           <GlassIconButton icon="chevron-back" label="Back" variant="clear" onPress={() => router.back()} />
-        </View>
+          <GlassIconButton
+            icon="ellipsis-horizontal"
+            label="More options"
+            variant="clear"
+            onPress={() =>
+              showAlert(project.title, undefined, [
+                { text: 'Report this project', onPress: () => askToReport(dispatch, 'project', project.id, 'this project') },
+                { text: `Block ${owner.firstName}`, style: 'destructive', onPress: () => askToBlock(dispatch, owner.id, owner.firstName, () => router.back()) },
+                { text: 'Cancel', style: 'cancel' },
+              ])
+            }
+          />
+        </Row>
         {project.photos.length > 1 ? (
           <View style={{ position: 'absolute', bottom: 14, right: 14 }}>
             <Badge label={`${project.photos.length} photos · swipe`} tone="dark" />

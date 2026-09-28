@@ -12,7 +12,8 @@
       "bundleIdentifier": "com.rennova.app",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Add photos of your rooms so contractors can quote accurately.",
-        "NSCameraUsageDescription": "Take photos of your rooms so contractors can quote accurately."
+        "NSCameraUsageDescription": "Take photos of your rooms so contractors can quote accurately.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -45,6 +46,9 @@
           "photosPermission": "Add photos of your rooms so contractors can quote accurately."
         }
       ]
-    ]
+    ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
   }
 }

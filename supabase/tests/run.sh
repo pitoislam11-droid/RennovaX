@@ -13,5 +13,8 @@ for migration in "$here"/../migrations/*.sql; do
   psql -v ON_ERROR_STOP=1 -q -d "$db" -f "$migration"
 done
 
-psql -v ON_ERROR_STOP=1 -qtA -d "$db" -f "$here/10_marketplace_rules.sql" 2>&1 \
+# One session for all rule files, so later files can reuse the people and helpers set up earlier.
+files=()
+for t in "$here"/[1-9]*.sql; do files+=(-f "$t"); done
+psql -v ON_ERROR_STOP=1 -qtA -d "$db" "${files[@]}" 2>&1 \
   | sed -n -e 's/^psql:[^ ]* NOTICE:  /  /p' -e '/ERROR\|FAILED\|passed/p'
