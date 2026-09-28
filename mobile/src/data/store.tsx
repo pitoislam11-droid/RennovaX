@@ -230,7 +230,9 @@ function LiveStoreProvider({ children }: { children: ReactNode }) {
           refresh: reload,
           signOut: async () => {
             await unregisterPushToken(db).catch(() => undefined);
-            await db.auth.signOut();
+            const { error } = await db.auth.signOut();
+            // Offline or an expired session: still forget this phone's session.
+            if (error) await db.auth.signOut({ scope: 'local' });
           },
           deleteAccount: () => deleteAccount(db, userId),
         }

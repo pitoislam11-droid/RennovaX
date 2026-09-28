@@ -59,7 +59,15 @@ export default function ProfileTab() {
   const signOut = () =>
     showAlert('Sign out?', undefined, [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign out', style: 'destructive', onPress: () => account?.signOut().then(() => router.replace('/')) },
+      {
+        text: 'Sign out',
+        style: 'destructive',
+        onPress: () =>
+          account
+            ?.signOut()
+            .then(() => router.replace('/sign-in'))
+            .catch((e: unknown) => showAlert('Couldn’t sign out', e instanceof Error ? e.message : String(e))),
+      },
     ]);
 
   const resetDemo = () =>
